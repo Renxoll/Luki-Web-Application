@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from '../store/useAuthStore'
 import Login from '../features/auth/pages/Login'
+import Register from '../features/auth/pages/Register'
 import Dashboard from '../features/dashboard/pages/Dashboard'
 import Advisor from '../features/advisor/pages/Advisor'
 
@@ -14,6 +15,7 @@ export function AppRouter() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route
           path="/dashboard"
           element={

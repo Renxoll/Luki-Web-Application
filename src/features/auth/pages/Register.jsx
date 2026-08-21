@@ -6,12 +6,22 @@ export function Register() {
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const { mutate, isPending, isError } = useRegister()
+  const { mutate, isPending, isError, error } = useRegister()
 
   function handleSubmit(e) {
     e.preventDefault()
     mutate({ displayName, email, password })
   }
+
+  // Mismo criterio que en Login: el backend corre en el plan free de Render y
+  // se duerme tras 15 min de inactividad, así que un fallo sin respuesta 409
+  // suele ser el cold start, no un dato inválido del formulario.
+  const errorMessage =
+    error?.response?.status === 409
+      ? 'Ya existe una cuenta registrada con ese email.'
+      : error?.response
+        ? 'No se pudo crear la cuenta. Verifica tus datos e intenta de nuevo.'
+        : 'No se pudo conectar con el servidor. Espera unos segundos e intenta de nuevo.'
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-900 px-4 text-slate-50">
@@ -66,11 +76,7 @@ export function Register() {
             />
           </div>
 
-          {isError && (
-            <p className="text-sm text-red-400/90">
-              No se pudo crear la cuenta. Verifica tus datos e intenta de nuevo.
-            </p>
-          )}
+          {isError && <p className="text-sm text-red-400/90">{errorMessage}</p>}
 
           <button
             type="submit"

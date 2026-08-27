@@ -1,5 +1,6 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useMonthlySummary } from '../../analytics/api/useMonthlySummary'
+import { useConnectGmail } from '../../gmailsync/api/useConnectGmail'
 import { useAuthStore } from '../../../store/useAuthStore'
 
 const currencyFormatter = new Intl.NumberFormat('es-PE', {
@@ -39,6 +40,48 @@ function InboxBanner({ inboxAddress }) {
   )
 }
 
+function GmailConnectBanner() {
+  const { mutate, isPending } = useConnectGmail()
+
+  return (
+    <div className="mt-3 flex items-start gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+      <span className="mt-0.5 text-lg">📧</span>
+      <div className="flex-1">
+        <p className="text-sm text-off-white/80">
+          O conecta tu Gmail para que Luki lea tus notificaciones bancarias solo, sin
+          reenviar nada a mano.
+        </p>
+        <button
+          type="button"
+          onClick={() => mutate()}
+          disabled={isPending}
+          className="mt-2 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-medium text-slate-900 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isPending ? 'Conectando...' : 'Conectar Gmail'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function GmailConnectionStatus({ status }) {
+  if (status === 'connected') {
+    return (
+      <div className="mt-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-300">
+        Tu Gmail quedó conectado. Los próximos correos bancarios se procesan solos.
+      </div>
+    )
+  }
+  if (status === 'error') {
+    return (
+      <div className="mt-3 rounded-2xl border border-orange-400/30 bg-orange-400/10 p-4 text-sm text-orange-300">
+        No se pudo conectar tu Gmail. Intenta de nuevo.
+      </div>
+    )
+  }
+  return null
+}
+
 function BreakdownSkeleton() {
   return (
     <div className="mt-6 space-y-3">
@@ -57,8 +100,10 @@ function BreakdownSkeleton() {
 
 export function Dashboard() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const inboxAddress = useAuthStore((state) => state.inboxAddress)
   const { data, isLoading, isError, error } = useMonthlySummary()
+  const gmailStatus = searchParams.get('gmail')
 
   const variation =
     data && data.previousMonthTotal > 0
@@ -72,6 +117,8 @@ export function Dashboard() {
     <div className="min-h-screen bg-midnight px-4 py-8 text-off-white sm:px-8">
       <div className="mx-auto max-w-2xl">
         <InboxBanner inboxAddress={inboxAddress} />
+        <GmailConnectionStatus status={gmailStatus} />
+        {!gmailStatus && <GmailConnectBanner />}
 
         <h1 className="mt-6 text-xl font-semibold text-off-white/80">Resumen del mes</h1>
 

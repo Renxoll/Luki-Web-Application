@@ -4,6 +4,7 @@ import Login from '../features/auth/pages/Login'
 import Register from '../features/auth/pages/Register'
 import Dashboard from '../features/dashboard/pages/Dashboard'
 import Advisor from '../features/advisor/pages/Advisor'
+import Transactions from '../features/transactions/pages/Transactions'
 
 function ProtectedRoute({ children }) {
   const token = useAuthStore((state) => state.token)
@@ -29,6 +30,14 @@ export function AppRouter() {
           element={
             <ProtectedRoute>
               <Advisor />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/transactions"
+          element={
+            <ProtectedRoute>
+              <Transactions />
             </ProtectedRoute>
           }
         />

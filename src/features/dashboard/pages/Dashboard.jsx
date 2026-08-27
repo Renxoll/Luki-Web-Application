@@ -1,6 +1,7 @@
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useMonthlySummary } from '../../analytics/api/useMonthlySummary'
 import { useConnectGmail } from '../../gmailsync/api/useConnectGmail'
+import { PendingSendersList } from '../../pendingSenders/components/PendingSendersList'
 import { useAuthStore } from '../../../store/useAuthStore'
 
 const currencyFormatter = new Intl.NumberFormat('es-PE', {
@@ -119,6 +120,7 @@ export function Dashboard() {
         <InboxBanner inboxAddress={inboxAddress} />
         <GmailConnectionStatus status={gmailStatus} />
         {!gmailStatus && <GmailConnectBanner />}
+        <PendingSendersList />
 
         <h1 className="mt-6 text-xl font-semibold text-off-white/80">Resumen del mes</h1>
 
@@ -146,9 +148,18 @@ export function Dashboard() {
           </div>
         )}
 
-        <h2 className="mt-8 text-sm font-medium uppercase tracking-wide text-off-white/50">
-          Gastos por categoría
-        </h2>
+        <div className="mt-8 flex items-center justify-between">
+          <h2 className="text-sm font-medium uppercase tracking-wide text-off-white/50">
+            Gastos por categoría
+          </h2>
+          <button
+            type="button"
+            onClick={() => navigate('/transactions')}
+            className="text-xs font-medium text-neon-purple transition hover:brightness-110"
+          >
+            Ver todas las transacciones →
+          </button>
+        </div>
 
         {isLoading && <BreakdownSkeleton />}
 

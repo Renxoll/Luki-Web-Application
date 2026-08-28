@@ -12,6 +12,7 @@ const CATEGORIES_ENDPOINT = '/transactions/categories'
  * @property {string} merchant
  * @property {string} categoryCode
  * @property {string} category
+ * @property {'EXPENSE'|'INCOME'} type
  * @property {string} createdAt
  */
 

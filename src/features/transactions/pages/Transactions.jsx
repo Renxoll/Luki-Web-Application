@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { RecordIncomeForm } from '../components/RecordIncomeForm'
 import { TransactionList } from '../components/TransactionList'
 
 export function Transactions() {
@@ -19,6 +20,7 @@ export function Transactions() {
           <h1 className="text-xl font-semibold">Tus transacciones</h1>
         </div>
 
+        <RecordIncomeForm />
         <TransactionList />
       </div>
     </div>

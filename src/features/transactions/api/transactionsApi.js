@@ -54,3 +54,12 @@ export async function updateTransactionCategory(transactionId, categoryCode) {
   const { data } = await apiClient.patch(`${TRANSACTIONS_ENDPOINT}/${transactionId}/category`, { categoryCode })
   return data
 }
+
+/**
+ * @param {{amount: number, currency: string, source: string}} params
+ * @returns {Promise<Transaction>}
+ */
+export async function recordManualIncome({ amount, currency, source }) {
+  const { data } = await apiClient.post(`${TRANSACTIONS_ENDPOINT}/income`, { amount, currency, source })
+  return data
+}

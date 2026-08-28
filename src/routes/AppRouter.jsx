@@ -5,6 +5,7 @@ import Register from '../features/auth/pages/Register'
 import Dashboard from '../features/dashboard/pages/Dashboard'
 import Advisor from '../features/advisor/pages/Advisor'
 import Transactions from '../features/transactions/pages/Transactions'
+import GmailAccounts from '../features/gmailsync/pages/GmailAccounts'
 
 function ProtectedRoute({ children }) {
   const token = useAuthStore((state) => state.token)
@@ -38,6 +39,14 @@ export function AppRouter() {
           element={
             <ProtectedRoute>
               <Transactions />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/gmail-accounts"
+          element={
+            <ProtectedRoute>
+              <GmailAccounts />
             </ProtectedRoute>
           }
         />

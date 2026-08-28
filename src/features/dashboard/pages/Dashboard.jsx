@@ -1,6 +1,6 @@
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useMonthlySummary } from '../../analytics/api/useMonthlySummary'
-import { useConnectGmail } from '../../gmailsync/api/useConnectGmail'
+import { useGmailConnections } from '../../gmailsync/api/useGmailConnections'
 import { PendingSendersList } from '../../pendingSenders/components/PendingSendersList'
 import { useAuthStore } from '../../../store/useAuthStore'
 
@@ -41,46 +41,41 @@ function InboxBanner({ inboxAddress }) {
   )
 }
 
-function GmailConnectBanner() {
-  const { mutate, isPending } = useConnectGmail()
+function GmailConnectionsSummary({ gmailStatus }) {
+  const { data: connections } = useGmailConnections()
+  const navigate = useNavigate()
+  const count = connections?.length ?? 0
 
   return (
-    <div className="mt-3 flex items-start gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4">
-      <span className="mt-0.5 text-lg">📧</span>
-      <div className="flex-1">
-        <p className="text-sm text-off-white/80">
-          O conecta tu Gmail para que Luki lea tus notificaciones bancarias solo, sin
-          reenviar nada a mano.
-        </p>
-        <button
-          type="button"
-          onClick={() => mutate()}
-          disabled={isPending}
-          className="mt-2 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-medium text-slate-900 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isPending ? 'Conectando...' : 'Conectar Gmail'}
-        </button>
-      </div>
+    <div className="mt-3">
+      <button
+        type="button"
+        onClick={() => navigate('/gmail-accounts')}
+        className="flex w-full items-center justify-between rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-left transition hover:brightness-110"
+      >
+        <span className="flex items-center gap-2 text-sm text-off-white/80">
+          <span className="text-lg">📧</span>
+          {count > 0
+            ? `${count} cuenta${count > 1 ? 's' : ''} de Gmail conectada${count > 1 ? 's' : ''}`
+            : 'Conecta tu Gmail para que Luki lea tus notificaciones bancarias solo'}
+        </span>
+        <span className="shrink-0 text-xs font-medium text-emerald-400">Gestionar →</span>
+      </button>
+
+      {/* Confirmación inmediata post-redirect de Google -- el conteo de arriba ya no
+          depende de esto (se refetchea solo), es solo un toast momentáneo. */}
+      {gmailStatus === 'connected' && (
+        <div className="mt-2 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-300">
+          Tu Gmail quedó conectado. Los próximos correos bancarios se procesan solos.
+        </div>
+      )}
+      {gmailStatus === 'error' && (
+        <div className="mt-2 rounded-2xl border border-orange-400/30 bg-orange-400/10 p-3 text-sm text-orange-300">
+          No se pudo conectar tu Gmail. Intenta de nuevo.
+        </div>
+      )}
     </div>
   )
-}
-
-function GmailConnectionStatus({ status }) {
-  if (status === 'connected') {
-    return (
-      <div className="mt-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-300">
-        Tu Gmail quedó conectado. Los próximos correos bancarios se procesan solos.
-      </div>
-    )
-  }
-  if (status === 'error') {
-    return (
-      <div className="mt-3 rounded-2xl border border-orange-400/30 bg-orange-400/10 p-4 text-sm text-orange-300">
-        No se pudo conectar tu Gmail. Intenta de nuevo.
-      </div>
-    )
-  }
-  return null
 }
 
 function BreakdownSkeleton() {
@@ -118,8 +113,7 @@ export function Dashboard() {
     <div className="min-h-screen bg-midnight px-4 py-8 text-off-white sm:px-8">
       <div className="mx-auto max-w-2xl">
         <InboxBanner inboxAddress={inboxAddress} />
-        <GmailConnectionStatus status={gmailStatus} />
-        {!gmailStatus && <GmailConnectBanner />}
+        <GmailConnectionsSummary gmailStatus={gmailStatus} />
         <PendingSendersList />
 
         <h1 className="mt-6 text-xl font-semibold text-off-white/80">Resumen del mes</h1>
@@ -137,13 +131,33 @@ export function Dashboard() {
 
         {!isLoading && !isError && data && (
           <div className="mt-4 rounded-2xl bg-white/5 p-6 shadow-xl">
-            <p className="text-sm text-off-white/60">Balance total gastado</p>
-            <p className="mt-2 text-4xl font-bold tracking-tight">
-              {formatCurrency(data.totalSpent)}
-            </p>
-            <p className={`mt-2 text-sm font-medium ${variationColor}`}>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-off-white/60">Ingresos</p>
+                <p className="mt-1 text-2xl font-bold text-emerald-400">
+                  {formatCurrency(data.totalIncome)}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-off-white/60">Gastos</p>
+                <p className="mt-1 text-2xl font-bold text-orange-400">
+                  {formatCurrency(data.totalSpent)}
+                </p>
+              </div>
+            </div>
+            <div className="mt-4 border-t border-white/10 pt-3">
+              <p className="text-sm text-off-white/60">Balance neto</p>
+              <p
+                className={`mt-1 text-xl font-semibold ${
+                  data.totalIncome - data.totalSpent >= 0 ? 'text-emerald-400' : 'text-orange-400'
+                }`}
+              >
+                {formatCurrency(data.totalIncome - data.totalSpent)}
+              </p>
+            </div>
+            <p className={`mt-3 text-xs font-medium ${variationColor}`}>
               {variationSign}
-              {variation.toFixed(1)}% vs. mes anterior
+              {variation.toFixed(1)}% de gasto vs. mes anterior
             </p>
           </div>
         )}

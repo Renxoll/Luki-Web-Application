@@ -26,7 +26,14 @@ export function AdvisorChat() {
 
     mutate(text, {
       onSuccess: (data) => {
-        setMessages((prev) => [...prev, { role: 'luki', content: data.reply }])
+        // Defensa en profundidad: el backend ya no debería mandar un reply vacío (ver
+        // GeminiFinancialAdvisorAdapter), pero sin este fallback una respuesta en blanco se
+        // vería como una burbuja de chat vacía, sin ningún indicio de error para el usuario.
+        const reply = data?.reply?.trim()
+        setMessages((prev) => [
+          ...prev,
+          { role: 'luki', content: reply || 'No pude generar una respuesta para eso. Intenta reformular tu pregunta.' },
+        ])
       },
       onError: () => {
         setMessages((prev) => [

@@ -15,6 +15,7 @@ const MONTHLY_SUMMARY_ENDPOINT = '/analytics/monthly-summary'
  * @typedef {Object} MonthlySummary
  * @property {number} totalSpent
  * @property {number} previousMonthTotal
+ * @property {number} totalIncome
  * @property {CategoryBreakdown[]} breakdown
  */
 

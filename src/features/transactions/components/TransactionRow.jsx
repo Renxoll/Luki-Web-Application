@@ -13,7 +13,8 @@ const STATUS_LABEL = {
 export function TransactionRow({ transaction }) {
   const { mutate, isPending } = useUpdateTransactionCategory()
   const statusLabel = STATUS_LABEL[transaction.status]
-  const canEditCategory = transaction.status === 'PROCESSED'
+  const isIncome = transaction.type === 'INCOME'
+  const canEditCategory = transaction.status === 'PROCESSED' && !isIncome
 
   return (
     <li className="flex items-center justify-between gap-3 rounded-xl bg-white/5 p-4">
@@ -33,8 +34,16 @@ export function TransactionRow({ transaction }) {
         />
       )}
 
-      <p className="w-24 shrink-0 text-right font-semibold">
-        {transaction.amount != null ? currencyFormatter.format(transaction.amount) : '—'}
+      {isIncome && transaction.status === 'PROCESSED' && (
+        <span className="shrink-0 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-xs text-emerald-400">
+          Ingreso
+        </span>
+      )}
+
+      <p className={`w-24 shrink-0 text-right font-semibold ${isIncome ? 'text-emerald-400' : ''}`}>
+        {transaction.amount != null
+          ? `${isIncome ? '+' : ''}${currencyFormatter.format(transaction.amount)}`
+          : '—'}
       </p>
     </li>
   )

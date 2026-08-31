@@ -20,3 +20,21 @@ export async function fetchGmailConnections() {
 export async function disconnectGmailConnection(connectionId) {
   await apiClient.delete(`${CONNECTIONS_ENDPOINT}/${connectionId}`)
 }
+
+/**
+ * @typedef {Object} GmailSyncResult
+ * @property {number} connectionsSynced
+ * @property {number} transactionsIngested   gastos nuevos que ya entraron a categorización
+ * @property {number} pendingSendersRegistered  correos de remitentes que faltan aprobar
+ * @property {string} syncedAt
+ */
+
+/**
+ * Fuerza la lectura de la bandeja ahora (mismo trabajo que el job programado, acotado al
+ * usuario autenticado). Puede tardar unos segundos: hace llamadas reales a la API de Gmail.
+ * @returns {Promise<GmailSyncResult>}
+ */
+export async function syncGmailConnections() {
+  const { data } = await apiClient.post(`${CONNECTIONS_ENDPOINT}/sync`)
+  return data
+}

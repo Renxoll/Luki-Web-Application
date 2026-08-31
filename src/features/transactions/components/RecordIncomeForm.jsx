@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { Plus } from 'lucide-react'
 import { useRecordManualIncome } from '../api/useRecordManualIncome'
+import { Button } from '../../../components/Button'
 
 const CURRENCY = 'PEN'
 
@@ -18,10 +20,7 @@ export function RecordIncomeForm() {
 
   function handleSubmit(e) {
     e.preventDefault()
-    mutate(
-      { amount: Number(amount), currency: CURRENCY, source: source.trim() },
-      { onSuccess: close },
-    )
+    mutate({ amount: Number(amount), currency: CURRENCY, source: source.trim() }, { onSuccess: close })
   }
 
   if (!isOpen) {
@@ -29,18 +28,19 @@ export function RecordIncomeForm() {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="mt-4 w-full rounded-xl border border-dashed border-emerald-500/40 bg-emerald-500/5 py-3 text-sm font-medium text-emerald-400 transition hover:bg-emerald-500/10"
+        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-electric-mint/40 bg-electric-mint/5 py-3.5 text-sm font-semibold text-electric-mint transition hover:bg-electric-mint/10"
       >
-        + Registrar un ingreso
+        <Plus size={16} strokeWidth={2.5} />
+        Registrar un ingreso
       </button>
     )
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-4 space-y-3 rounded-xl bg-white/5 p-4">
-      <p className="text-sm font-medium text-off-white">¿Cuánto te depositaron?</p>
+    <form onSubmit={handleSubmit} className="card space-y-3 p-4">
+      <p className="text-sm font-semibold">¿Cuánto te depositaron?</p>
 
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row">
         <input
           type="number"
           inputMode="decimal"
@@ -51,7 +51,7 @@ export function RecordIncomeForm() {
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           placeholder="Monto (S/)"
-          className="w-32 rounded-lg bg-white/10 px-3 py-2 text-sm text-off-white placeholder:text-off-white/40 outline-none focus:ring-2 focus:ring-emerald-500"
+          className="input sm:w-36"
         />
         <input
           type="text"
@@ -59,28 +59,21 @@ export function RecordIncomeForm() {
           value={source}
           onChange={(e) => setSource(e.target.value)}
           placeholder="¿De quién o de dónde? (ej. Sueldo, Juan Pérez)"
-          className="flex-1 rounded-lg bg-white/10 px-3 py-2 text-sm text-off-white placeholder:text-off-white/40 outline-none focus:ring-2 focus:ring-emerald-500"
+          className="input flex-1"
         />
       </div>
 
-      {isError && <p className="text-sm text-red-400/90">No se pudo registrar el ingreso. Intenta de nuevo.</p>}
+      {isError && (
+        <p className="text-sm text-rose-300">No se pudo registrar el ingreso. Intenta de nuevo.</p>
+      )}
 
       <div className="flex justify-end gap-2">
-        <button
-          type="button"
-          onClick={close}
-          disabled={isPending}
-          className="rounded-lg px-3 py-2 text-sm text-off-white/60 transition hover:text-off-white disabled:cursor-not-allowed disabled:opacity-60"
-        >
+        <Button type="button" variant="subtle" size="sm" onClick={close} disabled={isPending}>
           Cancelar
-        </button>
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-slate-900 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isPending ? 'Guardando...' : 'Guardar ingreso'}
-        </button>
+        </Button>
+        <Button type="submit" variant="mint" size="sm" loading={isPending}>
+          {isPending ? 'Guardando…' : 'Guardar ingreso'}
+        </Button>
       </div>
     </form>
   )

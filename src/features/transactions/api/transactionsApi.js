@@ -13,6 +13,7 @@ const CATEGORIES_ENDPOINT = '/transactions/categories'
  * @property {string} categoryCode
  * @property {string} category
  * @property {'EXPENSE'|'INCOME'} type
+ * @property {boolean} internalTransfer  transferencia entre cuentas propias (no cuenta en el resumen)
  * @property {string} createdAt
  */
 
@@ -52,6 +53,21 @@ export async function fetchCategories() {
  */
 export async function updateTransactionCategory(transactionId, categoryCode) {
   const { data } = await apiClient.patch(`${TRANSACTIONS_ENDPOINT}/${transactionId}/category`, { categoryCode })
+  return data
+}
+
+/**
+ * Marca o desmarca una transacción como movimiento entre las cuentas propias del usuario
+ * (no cuenta como gasto ni ingreso en el resumen).
+ * @param {string} transactionId
+ * @param {boolean} internalTransfer
+ * @returns {Promise<Transaction>}
+ */
+export async function setInternalTransfer(transactionId, internalTransfer) {
+  const { data } = await apiClient.patch(
+    `${TRANSACTIONS_ENDPOINT}/${transactionId}/internal-transfer`,
+    { internalTransfer },
+  )
   return data
 }
 

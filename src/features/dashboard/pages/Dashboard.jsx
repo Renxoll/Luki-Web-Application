@@ -1,6 +1,7 @@
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useMonthlySummary } from '../../analytics/api/useMonthlySummary'
 import { useGmailConnections } from '../../gmailsync/api/useGmailConnections'
+import { RefreshExpensesButton } from '../../gmailsync/components/RefreshExpensesButton'
 import { PendingSendersList } from '../../pendingSenders/components/PendingSendersList'
 import { useAuthStore } from '../../../store/useAuthStore'
 
@@ -61,6 +62,10 @@ function GmailConnectionsSummary({ gmailStatus }) {
         </span>
         <span className="shrink-0 text-xs font-medium text-emerald-400">Gestionar →</span>
       </button>
+
+      {/* Con al menos una cuenta conectada, dejar refrescar los gastos sin salir del
+          dashboard -- la lectura automática corre cada pocos minutos, esto la fuerza ahora. */}
+      {count > 0 && <RefreshExpensesButton className="mt-2" />}
 
       {/* Confirmación inmediata post-redirect de Google -- el conteo de arriba ya no
           depende de esto (se refetchea solo), es solo un toast momentáneo. */}

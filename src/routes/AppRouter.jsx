@@ -1,5 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from '../store/useAuthStore'
+import Landing from '../features/marketing/pages/Landing'
+import PrivacyPolicy from '../features/marketing/pages/PrivacyPolicy'
+import Terms from '../features/marketing/pages/Terms'
 import Login from '../features/auth/pages/Login'
 import Register from '../features/auth/pages/Register'
 import Dashboard from '../features/dashboard/pages/Dashboard'
@@ -16,6 +19,9 @@ export function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<Terms />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route
@@ -50,7 +56,7 @@ export function AppRouter() {
             </ProtectedRoute>
           }
         />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   )

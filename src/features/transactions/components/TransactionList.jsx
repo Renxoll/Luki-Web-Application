@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ChevronLeft, ChevronRight, ReceiptText } from 'lucide-react'
 import { useTransactions } from '../api/useTransactions'
 import { TransactionRow } from './TransactionRow'
 
@@ -6,12 +7,9 @@ const PAGE_SIZE = 20
 
 function TransactionListSkeleton() {
   return (
-    <div className="mt-4 space-y-3">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="flex animate-pulse items-center justify-between rounded-xl bg-white/5 p-4">
-          <div className="h-4 w-32 rounded bg-white/10" />
-          <div className="h-4 w-16 rounded bg-white/10" />
-        </div>
+    <div className="mt-5 space-y-2">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="h-[70px] animate-pulse rounded-2xl bg-white/[0.05]" />
       ))}
     </div>
   )
@@ -25,8 +23,8 @@ export function TransactionList() {
 
   if (isError) {
     return (
-      <div className="mt-4 rounded-2xl border border-orange-400/30 bg-orange-400/10 p-6">
-        <p className="font-medium text-orange-300">No pudimos cargar tus transacciones</p>
+      <div className="card mt-5 border-orange-400/25 bg-orange-400/10 p-6">
+        <p className="font-semibold text-orange-300">No pudimos cargar tus transacciones</p>
         <p className="mt-1 text-sm text-off-white/60">{error?.message || 'Inténtalo de nuevo en unos minutos.'}</p>
       </div>
     )
@@ -34,8 +32,13 @@ export function TransactionList() {
 
   if (!data || data.items.length === 0) {
     return (
-      <div className="mt-4 rounded-2xl bg-white/5 p-6 text-center text-sm text-off-white/60">
-        Todavía no tienes transacciones registradas.
+      <div className="card mt-5 flex flex-col items-center gap-3 p-10 text-center">
+        <span className="grid h-12 w-12 place-items-center rounded-2xl bg-white/[0.06] text-off-white/40">
+          <ReceiptText size={22} />
+        </span>
+        <p className="text-sm text-off-white/55">
+          Todavía no hay movimientos. Conecta tu Gmail y aparecerán solos.
+        </p>
       </div>
     )
   }
@@ -43,7 +46,7 @@ export function TransactionList() {
   const totalPages = Math.max(1, Math.ceil(data.totalElements / PAGE_SIZE))
 
   return (
-    <div className="mt-4">
+    <div className="mt-5">
       <ul className="space-y-2">
         {data.items.map((transaction) => (
           <TransactionRow key={transaction.transactionId} transaction={transaction} />
@@ -51,25 +54,25 @@ export function TransactionList() {
       </ul>
 
       {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-between text-sm text-off-white/60">
+        <div className="mt-5 flex items-center justify-between text-sm text-off-white/55">
           <button
             type="button"
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={page === 0}
-            className="rounded-lg px-3 py-1.5 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 transition hover:text-off-white disabled:cursor-not-allowed disabled:opacity-40"
           >
-            ← Anterior
+            <ChevronLeft size={16} /> Anterior
           </button>
-          <span>
-            Página {page + 1} de {totalPages}
+          <span className="tabular-nums">
+            {page + 1} / {totalPages}
           </span>
           <button
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
             disabled={page >= totalPages - 1}
-            className="rounded-lg px-3 py-1.5 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 transition hover:text-off-white disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Siguiente →
+            Siguiente <ChevronRight size={16} />
           </button>
         </div>
       )}

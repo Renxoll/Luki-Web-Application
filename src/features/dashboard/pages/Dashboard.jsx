@@ -193,8 +193,8 @@ export function Dashboard() {
   const firstName = (user?.email || '').split('@')[0]
 
   return (
-    <AppShell>
-      <div className="animate-fade-up space-y-8">
+    <AppShell maxWidth="max-w-6xl">
+      <div className="animate-fade-up">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
             Hola{firstName ? `, ${firstName}` : ''}
@@ -202,47 +202,57 @@ export function Dashboard() {
           <p className="mt-1 text-sm text-off-white/55">Este es el pulso de tu mes.</p>
         </div>
 
-        {isLoading && <HeroSkeleton />}
-        {isError && (
-          <div className="card border-orange-400/25 bg-orange-400/10 p-6">
-            <p className="font-semibold text-orange-300">No pudimos cargar tu resumen</p>
-            <p className="mt-1 text-sm text-off-white/60">
-              {error?.message || 'Inténtalo de nuevo en unos minutos.'}
-            </p>
-          </div>
-        )}
-        {!isLoading && !isError && data && <Hero data={data} />}
+        {/* Desktop: dos columnas que caben en una pantalla, sin scroll de página.
+            Móvil: una sola columna con scroll natural. */}
+        <div className="mt-6 grid gap-6 lg:grid-cols-3 lg:items-start">
+          <div className="space-y-6 lg:col-span-2">
+            {isLoading && <HeroSkeleton />}
+            {isError && (
+              <div className="card border-orange-400/25 bg-orange-400/10 p-6">
+                <p className="font-semibold text-orange-300">No pudimos cargar tu resumen</p>
+                <p className="mt-1 text-sm text-off-white/60">
+                  {error?.message || 'Inténtalo de nuevo en unos minutos.'}
+                </p>
+              </div>
+            )}
+            {!isLoading && !isError && data && <Hero data={data} />}
 
-        <GmailCard gmailStatus={gmailStatus} />
-        <InboxBanner inboxAddress={inboxAddress} />
-        <PendingSendersList />
-
-        <div>
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="section-title">Gastos por categoría</h2>
-            <Link
-              to="/transactions"
-              className="text-xs font-semibold text-neon-purple hover:brightness-125"
-            >
-              Ver movimientos →
-            </Link>
-          </div>
-          {isLoading ? <BreakdownSkeleton /> : <Breakdown items={data?.breakdown} />}
-        </div>
-
-        <div className="card card-hover overflow-hidden">
-          <Link to="/advisor" className="flex items-center gap-4 p-5">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-brand-gradient text-white shadow-glow">
-              <Sparkles size={22} strokeWidth={2.2} />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="font-semibold">Pregúntale a Luki</p>
-              <p className="text-sm text-off-white/55">
-                “¿En qué se me fue la plata este mes?” — respuesta al toque.
-              </p>
+            <div className="flex min-h-0 flex-col">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="section-title">Gastos por categoría</h2>
+                <Link
+                  to="/transactions"
+                  className="text-xs font-semibold text-neon-purple hover:brightness-125"
+                >
+                  Ver movimientos →
+                </Link>
+              </div>
+              <div className="lg:max-h-[calc(100vh-24rem)] lg:overflow-y-auto lg:pr-1">
+                {isLoading ? <BreakdownSkeleton /> : <Breakdown items={data?.breakdown} />}
+              </div>
             </div>
-            <span className="shrink-0 text-neon-purple">→</span>
-          </Link>
+          </div>
+
+          <div className="space-y-4 lg:sticky lg:top-24">
+            <GmailCard gmailStatus={gmailStatus} />
+            <InboxBanner inboxAddress={inboxAddress} />
+            <PendingSendersList />
+
+            <div className="card card-hover overflow-hidden">
+              <Link to="/advisor" className="flex items-center gap-4 p-5">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-brand-gradient text-white shadow-glow">
+                  <Sparkles size={22} strokeWidth={2.2} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold">Pregúntale a Luki</p>
+                  <p className="text-sm text-off-white/55">
+                    “¿En qué se me fue la plata este mes?”
+                  </p>
+                </div>
+                <span className="shrink-0 text-neon-purple">→</span>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </AppShell>

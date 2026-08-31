@@ -1,81 +1,77 @@
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
+import {
+  TrendingUp,
+  TrendingDown,
+  ArrowUpRight,
+  ArrowDownRight,
+  Sparkles,
+  Mail,
+  CheckCircle2,
+  AlertTriangle,
+  Inbox,
+} from 'lucide-react'
 import { useMonthlySummary } from '../../analytics/api/useMonthlySummary'
 import { useGmailConnections } from '../../gmailsync/api/useGmailConnections'
 import { RefreshExpensesButton } from '../../gmailsync/components/RefreshExpensesButton'
 import { PendingSendersList } from '../../pendingSenders/components/PendingSendersList'
 import { useAuthStore } from '../../../store/useAuthStore'
+import { AppShell } from '../../../components/AppShell'
+import { categoryColor } from '../../../lib/category'
 
-const currencyFormatter = new Intl.NumberFormat('es-PE', {
-  style: 'currency',
-  currency: 'PEN',
-})
-
-function formatCurrency(value) {
-  return currencyFormatter.format(value ?? 0)
-}
-
-function BalanceCardSkeleton() {
-  return (
-    <div className="animate-pulse rounded-2xl bg-white/5 p-6 shadow-xl">
-      <div className="h-4 w-32 rounded bg-white/10" />
-      <div className="mt-4 h-9 w-48 rounded bg-white/10" />
-      <div className="mt-3 h-4 w-24 rounded bg-white/10" />
-    </div>
-  )
-}
+const currencyFormatter = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' })
+const formatCurrency = (v) => currencyFormatter.format(v ?? 0)
 
 function InboxBanner({ inboxAddress }) {
   if (!inboxAddress) return null
-
   return (
-    <div className="flex items-start gap-3 rounded-2xl border border-neon-purple/30 bg-neon-purple/10 p-4">
-      <span className="mt-0.5 text-lg text-neon-purple">✉️</span>
-      <div>
-        <p className="text-sm text-off-white/80">
-          Para registrar un gasto, reenvía tus notificaciones bancarias a:
+    <div className="card flex items-start gap-3 p-4">
+      <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-neon-purple/15 text-neon-purple">
+        <Inbox size={18} strokeWidth={2.2} />
+      </span>
+      <div className="min-w-0">
+        <p className="text-sm text-off-white/75">
+          ¿Prefieres reenviar? Manda tus notificaciones bancarias a:
         </p>
-        <p className="mt-1 font-mono text-sm font-semibold text-neon-purple">
-          {inboxAddress}
-        </p>
+        <p className="mt-1 break-all font-mono text-sm font-semibold text-neon-purple">{inboxAddress}</p>
       </div>
     </div>
   )
 }
 
-function GmailConnectionsSummary({ gmailStatus }) {
+function GmailCard({ gmailStatus }) {
   const { data: connections } = useGmailConnections()
-  const navigate = useNavigate()
   const count = connections?.length ?? 0
 
   return (
-    <div className="mt-3">
-      <button
-        type="button"
-        onClick={() => navigate('/gmail-accounts')}
-        className="flex w-full items-center justify-between rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-left transition hover:brightness-110"
+    <div className="space-y-3">
+      <Link
+        to="/gmail-accounts"
+        className="card card-hover flex items-center justify-between gap-3 p-4"
       >
-        <span className="flex items-center gap-2 text-sm text-off-white/80">
-          <span className="text-lg">📧</span>
-          {count > 0
-            ? `${count} cuenta${count > 1 ? 's' : ''} de Gmail conectada${count > 1 ? 's' : ''}`
-            : 'Conecta tu Gmail para que Luki lea tus notificaciones bancarias solo'}
+        <span className="flex items-center gap-3 text-sm">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-electric-mint/15 text-electric-mint">
+            <Mail size={18} strokeWidth={2.2} />
+          </span>
+          <span className="text-off-white/80">
+            {count > 0
+              ? `${count} cuenta${count > 1 ? 's' : ''} de Gmail conectada${count > 1 ? 's' : ''}`
+              : 'Conecta tu Gmail para que Luki lea tus notificaciones bancarias solo'}
+          </span>
         </span>
-        <span className="shrink-0 text-xs font-medium text-emerald-400">Gestionar →</span>
-      </button>
+        <span className="shrink-0 text-xs font-semibold text-electric-mint">Gestionar →</span>
+      </Link>
 
-      {/* Con al menos una cuenta conectada, dejar refrescar los gastos sin salir del
-          dashboard -- la lectura automática corre cada pocos minutos, esto la fuerza ahora. */}
-      {count > 0 && <RefreshExpensesButton className="mt-2" />}
+      {count > 0 && <RefreshExpensesButton className="px-1" />}
 
-      {/* Confirmación inmediata post-redirect de Google -- el conteo de arriba ya no
-          depende de esto (se refetchea solo), es solo un toast momentáneo. */}
       {gmailStatus === 'connected' && (
-        <div className="mt-2 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-300">
+        <div className="flex items-center gap-2 rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-3 text-sm text-emerald-300">
+          <CheckCircle2 size={16} className="shrink-0" />
           Tu Gmail quedó conectado. Los próximos correos bancarios se procesan solos.
         </div>
       )}
       {gmailStatus === 'error' && (
-        <div className="mt-2 rounded-2xl border border-orange-400/30 bg-orange-400/10 p-3 text-sm text-orange-300">
+        <div className="flex items-center gap-2 rounded-xl border border-orange-400/25 bg-orange-400/10 p-3 text-sm text-orange-300">
+          <AlertTriangle size={16} className="shrink-0" />
           No se pudo conectar tu Gmail. Intenta de nuevo.
         </div>
       )}
@@ -83,133 +79,173 @@ function GmailConnectionsSummary({ gmailStatus }) {
   )
 }
 
+function HeroSkeleton() {
+  return <div className="h-44 animate-pulse rounded-2xl bg-white/[0.05]" />
+}
+
+function Hero({ data }) {
+  const net = (data.totalIncome ?? 0) - (data.totalSpent ?? 0)
+  const positive = net >= 0
+  const variation =
+    data.previousMonthTotal > 0
+      ? ((data.totalSpent - data.previousMonthTotal) / data.previousMonthTotal) * 100
+      : null
+  const spentMore = variation != null && variation > 0
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-white/10 p-6 shadow-card">
+      <div className="absolute inset-0 -z-10 bg-brand-fade" />
+      <div className="absolute -right-16 -top-16 -z-10 h-48 w-48 rounded-full bg-neon-purple/25 blur-3xl" />
+
+      <p className="section-title">Balance neto de este mes</p>
+      <p
+        className={`mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl ${
+          positive ? 'text-off-white' : 'text-rose-300'
+        }`}
+      >
+        {positive ? '' : '−'}
+        {formatCurrency(Math.abs(net))}
+      </p>
+
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <span className="chip">
+          <ArrowDownRight size={13} className="text-emerald-400" />
+          Ingresos {formatCurrency(data.totalIncome)}
+        </span>
+        <span className="chip">
+          <ArrowUpRight size={13} className="text-orange-400" />
+          Gastos {formatCurrency(data.totalSpent)}
+        </span>
+        {variation != null && (
+          <span
+            className={`chip ${
+              spentMore ? 'text-orange-300' : 'text-emerald-300'
+            }`}
+          >
+            {spentMore ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
+            {spentMore ? '+' : ''}
+            {variation.toFixed(1)}% vs. mes anterior
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function BreakdownSkeleton() {
   return (
-    <div className="mt-6 space-y-3">
+    <div className="space-y-3">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div
-          key={i}
-          className="flex animate-pulse items-center justify-between rounded-xl bg-white/5 p-4"
-        >
-          <div className="h-4 w-28 rounded bg-white/10" />
-          <div className="h-4 w-16 rounded bg-white/10" />
-        </div>
+        <div key={i} className="h-12 animate-pulse rounded-xl bg-white/[0.05]" />
       ))}
     </div>
   )
 }
 
+function Breakdown({ items }) {
+  if (!items || items.length === 0) {
+    return (
+      <div className="card p-6 text-center text-sm text-off-white/55">
+        Aún no hay gastos categorizados este mes.
+      </div>
+    )
+  }
+  const max = Math.max(...items.map((i) => i.amount), 1)
+
+  return (
+    <ul className="space-y-2.5">
+      {items.map((item) => {
+        const c = categoryColor(item.categoryName)
+        return (
+          <li key={item.categoryId} className="card p-3.5">
+            <div className="flex items-center justify-between gap-3">
+              <span className="flex items-center gap-2 text-sm font-medium">
+                <span className={`h-2.5 w-2.5 rounded-full ${c.bar}`} />
+                {item.categoryName}
+              </span>
+              <span className="text-sm font-semibold">{formatCurrency(item.amount)}</span>
+            </div>
+            <div className="mt-2 flex items-center gap-2">
+              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
+                <div
+                  className={`h-full rounded-full ${c.bar}`}
+                  style={{ width: `${Math.max(4, (item.amount / max) * 100)}%` }}
+                />
+              </div>
+              <span className={`w-10 shrink-0 text-right text-xs ${c.text}`}>
+                {item.percentage.toFixed(0)}%
+              </span>
+            </div>
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+
 export function Dashboard() {
-  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const inboxAddress = useAuthStore((state) => state.inboxAddress)
+  const user = useAuthStore((state) => state.user)
   const { data, isLoading, isError, error } = useMonthlySummary()
   const gmailStatus = searchParams.get('gmail')
 
-  const variation =
-    data && data.previousMonthTotal > 0
-      ? ((data.totalSpent - data.previousMonthTotal) / data.previousMonthTotal) * 100
-      : 0
-  const hasIncreased = variation > 0
-  const variationColor = hasIncreased ? 'text-orange-400' : 'text-emerald-500'
-  const variationSign = hasIncreased ? '+' : ''
+  const firstName = (user?.email || '').split('@')[0]
 
   return (
-    <div className="min-h-screen bg-midnight px-4 py-8 text-off-white sm:px-8">
-      <div className="mx-auto max-w-2xl">
-        <InboxBanner inboxAddress={inboxAddress} />
-        <GmailConnectionsSummary gmailStatus={gmailStatus} />
-        <PendingSendersList />
+    <AppShell>
+      <div className="animate-fade-up space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Hola{firstName ? `, ${firstName}` : ''}
+          </h1>
+          <p className="mt-1 text-sm text-off-white/55">Este es el pulso de tu mes.</p>
+        </div>
 
-        <h1 className="mt-6 text-xl font-semibold text-off-white/80">Resumen del mes</h1>
-
-        {isLoading && <div className="mt-4"><BalanceCardSkeleton /></div>}
-
+        {isLoading && <HeroSkeleton />}
         {isError && (
-          <div className="mt-4 rounded-2xl border border-orange-400/30 bg-orange-400/10 p-6">
-            <p className="font-medium text-orange-300">No pudimos cargar tu resumen</p>
+          <div className="card border-orange-400/25 bg-orange-400/10 p-6">
+            <p className="font-semibold text-orange-300">No pudimos cargar tu resumen</p>
             <p className="mt-1 text-sm text-off-white/60">
               {error?.message || 'Inténtalo de nuevo en unos minutos.'}
             </p>
           </div>
         )}
+        {!isLoading && !isError && data && <Hero data={data} />}
 
-        {!isLoading && !isError && data && (
-          <div className="mt-4 rounded-2xl bg-white/5 p-6 shadow-xl">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-off-white/60">Ingresos</p>
-                <p className="mt-1 text-2xl font-bold text-emerald-400">
-                  {formatCurrency(data.totalIncome)}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-off-white/60">Gastos</p>
-                <p className="mt-1 text-2xl font-bold text-orange-400">
-                  {formatCurrency(data.totalSpent)}
-                </p>
-              </div>
-            </div>
-            <div className="mt-4 border-t border-white/10 pt-3">
-              <p className="text-sm text-off-white/60">Balance neto</p>
-              <p
-                className={`mt-1 text-xl font-semibold ${
-                  data.totalIncome - data.totalSpent >= 0 ? 'text-emerald-400' : 'text-orange-400'
-                }`}
-              >
-                {formatCurrency(data.totalIncome - data.totalSpent)}
-              </p>
-            </div>
-            <p className={`mt-3 text-xs font-medium ${variationColor}`}>
-              {variationSign}
-              {variation.toFixed(1)}% de gasto vs. mes anterior
-            </p>
+        <GmailCard gmailStatus={gmailStatus} />
+        <InboxBanner inboxAddress={inboxAddress} />
+        <PendingSendersList />
+
+        <div>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="section-title">Gastos por categoría</h2>
+            <Link
+              to="/transactions"
+              className="text-xs font-semibold text-neon-purple hover:brightness-125"
+            >
+              Ver movimientos →
+            </Link>
           </div>
-        )}
-
-        <div className="mt-8 flex items-center justify-between">
-          <h2 className="text-sm font-medium uppercase tracking-wide text-off-white/50">
-            Gastos por categoría
-          </h2>
-          <button
-            type="button"
-            onClick={() => navigate('/transactions')}
-            className="text-xs font-medium text-neon-purple transition hover:brightness-110"
-          >
-            Ver todas las transacciones →
-          </button>
+          {isLoading ? <BreakdownSkeleton /> : <Breakdown items={data?.breakdown} />}
         </div>
 
-        {isLoading && <BreakdownSkeleton />}
-
-        {!isLoading && !isError && data && (
-          <ul className="mt-4 space-y-2">
-            {data.breakdown.map((item) => (
-              <li
-                key={item.categoryId}
-                className="flex items-center justify-between rounded-xl bg-white/5 p-4"
-              >
-                <div>
-                  <p className="font-medium">{item.categoryName}</p>
-                  <p className="text-xs text-off-white/50">
-                    {item.percentage.toFixed(1)}% del total
-                  </p>
-                </div>
-                <p className="font-semibold">{formatCurrency(item.amount)}</p>
-              </li>
-            ))}
-          </ul>
-        )}
+        <div className="card card-hover overflow-hidden">
+          <Link to="/advisor" className="flex items-center gap-4 p-5">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-brand-gradient text-white shadow-glow">
+              <Sparkles size={22} strokeWidth={2.2} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold">Pregúntale a Luki</p>
+              <p className="text-sm text-off-white/55">
+                “¿En qué se me fue la plata este mes?” — respuesta al toque.
+              </p>
+            </div>
+            <span className="shrink-0 text-neon-purple">→</span>
+          </Link>
+        </div>
       </div>
-
-      <button
-        type="button"
-        onClick={() => navigate('/advisor')}
-        className="fixed bottom-6 right-6 flex items-center gap-2 rounded-full bg-neon-purple px-5 py-3 font-medium text-off-white shadow-lg shadow-neon-purple/30 transition hover:brightness-110"
-      >
-        Pregúntale a Luki
-      </button>
-    </div>
+    </AppShell>
   )
 }
 

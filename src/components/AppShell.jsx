@@ -1,11 +1,12 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, ArrowLeftRight, Sparkles, LogOut } from 'lucide-react'
+import { LayoutDashboard, ArrowLeftRight, Users, Sparkles, LogOut } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { Logo } from './Logo'
 
 const NAV = [
   { to: '/dashboard', label: 'Resumen', icon: LayoutDashboard },
   { to: '/transactions', label: 'Movimientos', icon: ArrowLeftRight },
+  { to: '/groups', label: 'Grupos', icon: Users },
   { to: '/advisor', label: 'Luki AI', icon: Sparkles },
 ]
 

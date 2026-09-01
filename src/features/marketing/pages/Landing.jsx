@@ -9,6 +9,9 @@ import {
   Zap,
   Lock,
   ArrowRight,
+  Users,
+  Receipt,
+  ArrowLeftRight,
 } from 'lucide-react'
 import { useAuthStore } from '../../../store/useAuthStore'
 import { Button } from '../../../components/Button'
@@ -39,6 +42,13 @@ const FEATURES = [
   { icon: BarChart3, title: 'Resumen del mes', text: 'Ingresos, gastos, balance y tendencia vs. el mes anterior.' },
   { icon: Lock, title: 'Tokens cifrados', text: 'Tus credenciales de Google se guardan cifradas (AES-256-GCM).' },
   { icon: ShieldCheck, title: 'Tú tienes el control', text: 'Desconecta tu Gmail o borra tu cuenta cuando quieras.' },
+]
+
+const GROUP_FEATURES = [
+  { icon: Users, title: 'Crea un grupo', text: 'Viaje, depa compartido, lo que sea. Invita a quien ya tenga cuenta en Luki.' },
+  { icon: Receipt, title: 'Registra el gasto', text: 'Se divide en partes iguales entre quienes elijas. Sin calculadora, sin WhatsApp.' },
+  { icon: ArrowLeftRight, title: 'Salda cuentas', text: 'Marca cuando alguien paga y el saldo de todos se actualiza solo.' },
+  { icon: Sparkles, title: 'Deudas simplificadas', text: 'Luki calcula el mínimo de transferencias para que el grupo quede a mano.' },
 ]
 
 function ProductMock() {
@@ -73,6 +83,43 @@ function ProductMock() {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function GroupsMock() {
+  return (
+    <div className="relative mx-auto w-full max-w-md animate-float">
+      <div className="absolute -inset-6 -z-10 rounded-[2rem] bg-electric-mint/15 blur-3xl" />
+      <div className="rounded-3xl border border-white/10 bg-midnight-800/80 p-5 shadow-card backdrop-blur">
+        <div className="flex items-center gap-3">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-neon-purple/15 text-neon-purple">
+            <Users size={18} strokeWidth={2.2} />
+          </span>
+          <div className="min-w-0">
+            <p className="font-semibold">Viaje a Cusco</p>
+            <p className="text-xs text-off-white/45">3 miembros</p>
+          </div>
+        </div>
+
+        <div className="mt-4 space-y-2">
+          {[
+            ['Tú', '+S/ 85.00', 'text-emerald-300'],
+            ['Marco', '−S/ 40.00', 'text-rose-300'],
+            ['Valeria', '−S/ 45.00', 'text-rose-300'],
+          ].map(([name, amount, color]) => (
+            <div key={name} className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.03] p-3 text-sm">
+              <span className="font-medium">{name}</span>
+              <span className={`font-semibold tabular-nums ${color}`}>{amount}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-3 flex items-center gap-2 rounded-xl bg-electric-mint/10 p-3 text-xs text-electric-mint">
+          <Sparkles size={13} className="shrink-0" />
+          Valeria te debe S/ 45.00 — con un pago quedan a mano
         </div>
       </div>
     </div>
@@ -164,6 +211,40 @@ export function Landing() {
                 <p className="mt-1 text-sm text-off-white/55">{text}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Grupos / gastos compartidos */}
+      <section className="px-4 py-16 sm:px-6">
+        <div className="mx-auto grid max-w-5xl items-center gap-12 lg:grid-cols-2">
+          <div className="order-2 lg:order-1 lg:pr-6">
+            <GroupsMock />
+          </div>
+
+          <div className="order-1 lg:order-2">
+            <span className="chip">
+              <Users size={13} className="text-electric-mint" /> Nuevo
+            </span>
+            <h2 className="mt-5 text-3xl font-bold tracking-tight sm:text-4xl">
+              Divide gastos con amigos, <span className="gradient-text">sin dramas</span>.
+            </h2>
+            <p className="mt-4 max-w-md text-base text-off-white/60">
+              Crea un grupo para el viaje, el depa o lo que sea. Registra un gasto y Luki lo
+              divide solo entre quienes elijas — y calcula el mínimo de pagos para que todos
+              queden a mano.
+            </p>
+            <div className="mt-8 grid gap-4 sm:grid-cols-2">
+              {GROUP_FEATURES.map(({ icon: Icon, title, text }) => (
+                <div key={title} className="card p-4">
+                  <span className="grid h-9 w-9 place-items-center rounded-lg bg-white/[0.06] text-electric-mint">
+                    <Icon size={16} strokeWidth={2.2} />
+                  </span>
+                  <h3 className="mt-3 text-sm font-semibold">{title}</h3>
+                  <p className="mt-1 text-xs text-off-white/55">{text}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>

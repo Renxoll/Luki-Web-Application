@@ -12,11 +12,17 @@ const MONTHLY_SUMMARY_ENDPOINT = '/analytics/monthly-summary'
  */
 
 /**
- * @typedef {Object} MonthlySummary
+ * @typedef {Object} CurrencySummary
+ * @property {string} currency
  * @property {number} totalSpent
  * @property {number} previousMonthTotal
  * @property {number} totalIncome
  * @property {CategoryBreakdown[]} breakdown
+ */
+
+/**
+ * @typedef {Object} MonthlySummary
+ * @property {CurrencySummary[]} currencies
  */
 
 /** @returns {Promise<MonthlySummary>} */

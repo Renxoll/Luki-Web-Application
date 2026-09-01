@@ -18,8 +18,12 @@ import { useAuthStore } from '../../../store/useAuthStore'
 import { AppShell } from '../../../components/AppShell'
 import { categoryColor } from '../../../lib/category'
 
-const currencyFormatter = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' })
-const formatCurrency = (v) => currencyFormatter.format(v ?? 0)
+// A diferencia de antes, la moneda ya no es siempre PEN -- el dashboard ahora puede traer
+// un CurrencySummary por cada moneda con movimiento (ver useMonthlySummary), así que el
+// formatter se arma por llamada en vez de ser una constante fija a PEN.
+function formatCurrency(amount, currency = 'PEN') {
+  return new Intl.NumberFormat('es-PE', { style: 'currency', currency }).format(amount ?? 0)
+}
 
 function InboxBanner({ inboxAddress }) {
   if (!inboxAddress) return null
@@ -97,24 +101,24 @@ function Hero({ data }) {
       <div className="absolute inset-0 -z-10 bg-brand-fade" />
       <div className="absolute -right-16 -top-16 -z-10 h-48 w-48 rounded-full bg-neon-purple/25 blur-3xl" />
 
-      <p className="section-title">Balance neto de este mes</p>
+      <p className="section-title">Balance neto de este mes {data.currency !== 'PEN' && `(${data.currency})`}</p>
       <p
         className={`mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl ${
           positive ? 'text-off-white' : 'text-rose-300'
         }`}
       >
         {positive ? '' : '−'}
-        {formatCurrency(Math.abs(net))}
+        {formatCurrency(Math.abs(net), data.currency)}
       </p>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <span className="chip">
           <ArrowDownRight size={13} className="text-emerald-400" />
-          Ingresos {formatCurrency(data.totalIncome)}
+          Ingresos {formatCurrency(data.totalIncome, data.currency)}
         </span>
         <span className="chip">
           <ArrowUpRight size={13} className="text-orange-400" />
-          Gastos {formatCurrency(data.totalSpent)}
+          Gastos {formatCurrency(data.totalSpent, data.currency)}
         </span>
         {variation != null && (
           <span
@@ -142,7 +146,7 @@ function BreakdownSkeleton() {
   )
 }
 
-function Breakdown({ items }) {
+function Breakdown({ items, currency }) {
   if (!items || items.length === 0) {
     return (
       <div className="card p-6 text-center text-sm text-off-white/55">
@@ -163,7 +167,7 @@ function Breakdown({ items }) {
                 <span className={`h-2.5 w-2.5 rounded-full ${c.bar}`} />
                 {item.categoryName}
               </span>
-              <span className="text-sm font-semibold">{formatCurrency(item.amount)}</span>
+              <span className="text-sm font-semibold">{formatCurrency(item.amount, currency)}</span>
             </div>
             <div className="mt-2 flex items-center gap-2">
               <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
@@ -215,22 +219,37 @@ export function Dashboard() {
                 </p>
               </div>
             )}
-            {!isLoading && !isError && data && <Hero data={data} />}
+            {isLoading && <BreakdownSkeleton />}
 
-            <div className="flex min-h-0 flex-col">
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="section-title">Gastos por categoría</h2>
-                <Link
-                  to="/transactions"
-                  className="text-xs font-semibold text-neon-purple hover:brightness-125"
-                >
-                  Ver movimientos →
-                </Link>
-              </div>
-              <div className="lg:max-h-[calc(100vh-24rem)] lg:overflow-y-auto lg:pr-1">
-                {isLoading ? <BreakdownSkeleton /> : <Breakdown items={data?.breakdown} />}
-              </div>
-            </div>
+            {/* Un bloque Hero + desglose por cada moneda con movimiento -- normalmente solo
+                PEN, pero si hay gastos en $ también (ej. Netflix, compras online) aparecen
+                separados, nunca sumados en un solo total sin sentido. */}
+            {!isLoading &&
+              !isError &&
+              data?.currencies.map((currencySummary, index) => (
+                <div key={currencySummary.currency} className="space-y-6">
+                  <Hero data={currencySummary} />
+
+                  <div className="flex min-h-0 flex-col">
+                    <div className="mb-3 flex items-center justify-between">
+                      <h2 className="section-title">
+                        Gastos por categoría{data.currencies.length > 1 ? ` · ${currencySummary.currency}` : ''}
+                      </h2>
+                      {index === 0 && (
+                        <Link
+                          to="/transactions"
+                          className="text-xs font-semibold text-neon-purple hover:brightness-125"
+                        >
+                          Ver movimientos →
+                        </Link>
+                      )}
+                    </div>
+                    <div className="lg:max-h-[calc(100vh-24rem)] lg:overflow-y-auto lg:pr-1">
+                      <Breakdown items={currencySummary.breakdown} currency={currencySummary.currency} />
+                    </div>
+                  </div>
+                </div>
+              ))}
           </div>
 
           <div className="space-y-4 lg:sticky lg:top-24">

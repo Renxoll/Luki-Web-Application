@@ -4,8 +4,13 @@ import { useSetInternalTransfer } from '../api/useSetInternalTransfer'
 import { CategorySelect } from './CategorySelect'
 import { categoryColor } from '../../../lib/category'
 
-const currencyFormatter = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' })
 const dateFormatter = new Intl.DateTimeFormat('es-PE', { day: '2-digit', month: 'short' })
+
+// Cada transacción trae su propia moneda (no todo es PEN -- ej. un cargo de Netflix en $)
+// así que el formatter se arma por fila en vez de fijarse a PEN.
+function formatAmount(amount, currency) {
+  return new Intl.NumberFormat('es-PE', { style: 'currency', currency: currency || 'PEN' }).format(amount)
+}
 
 const STATUS = {
   PROCESSED: null,
@@ -121,7 +126,7 @@ export function TransactionRow({ transaction }) {
         }`}
       >
         {transaction.amount != null
-          ? `${isIncome && !isTransfer ? '+' : ''}${currencyFormatter.format(transaction.amount)}`
+          ? `${isIncome && !isTransfer ? '+' : ''}${formatAmount(transaction.amount, transaction.currency)}`
           : '—'}
       </p>
     </li>

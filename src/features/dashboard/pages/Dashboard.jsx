@@ -97,7 +97,7 @@ function Hero({ data }) {
   const spentMore = variation != null && variation > 0
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/10 p-6 shadow-card">
+    <div className="relative overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/50 p-6 shadow-card backdrop-blur-sm">
       <div className="absolute inset-0 -z-10 bg-brand-fade" />
       <div className="absolute -right-16 -top-16 -z-10 h-48 w-48 rounded-full bg-neon-purple/25 blur-3xl" />
 
@@ -194,14 +194,15 @@ export function Dashboard() {
   const { data, isLoading, isError, error } = useMonthlySummary()
   const gmailStatus = searchParams.get('gmail')
 
-  const firstName = (user?.email || '').split('@')[0]
+  const displayName =
+    user?.name || user?.displayName || (user?.email || '').split('@')[0]
 
   return (
     <AppShell maxWidth="max-w-6xl">
       <div className="animate-fade-up">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            Hola{firstName ? `, ${firstName}` : ''}
+            Hola{displayName ? `, ${displayName}` : ''}
           </h1>
           <p className="mt-1 text-sm text-off-white/55">Este es el pulso de tu mes.</p>
         </div>

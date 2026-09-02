@@ -38,11 +38,11 @@
 
 @layer components {
   .card {
-    @apply rounded-2xl border border-white/[0.07] bg-white/[0.04] shadow-card backdrop-blur-sm;
+    @apply rounded-2xl border border-slate-700/50 bg-slate-800/50 shadow-card backdrop-blur-sm;
   }
 
   .card-hover {
-    @apply transition duration-200 hover:border-white/15 hover:bg-white/[0.06];
+    @apply transition duration-200 hover:border-slate-600/60 hover:bg-slate-800/70;
   }
 
   .input {

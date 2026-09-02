@@ -31,9 +31,9 @@ export function InviteMemberForm({ groupId }) {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="mt-2 flex items-center gap-1.5 text-xs font-medium text-off-white/50 transition hover:text-off-white"
+        className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-emerald-400/30 px-4 py-2 text-sm font-semibold text-emerald-400 transition-colors hover:bg-emerald-400/10"
       >
-        <UserPlus size={14} strokeWidth={2.3} />
+        <UserPlus size={16} strokeWidth={2.3} />
         Invitar a alguien
       </button>
     )

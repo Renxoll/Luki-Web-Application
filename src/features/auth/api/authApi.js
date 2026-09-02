@@ -10,6 +10,7 @@ const PROFILE_ENDPOINT = '/profiles/me'
  * @property {Object} user
  * @property {string} user.id
  * @property {string} user.email
+ * @property {string} user.displayName
  * @property {string} user.inboxAddress
  */
 
@@ -37,6 +38,11 @@ export async function signInAndFetchProfile({ email, password }) {
 
   return {
     token: tokenPair.accessToken,
-    user: { id: profile.userId, email, inboxAddress: profile.inboxAddress },
+    user: {
+      id: profile.userId,
+      email,
+      displayName: profile.displayName ?? profile.name ?? null,
+      inboxAddress: profile.inboxAddress,
+    },
   }
 }

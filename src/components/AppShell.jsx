@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, ArrowLeftRight, Users, Sparkles, LogOut } from 'lucide-react'
+import { LayoutDashboard, ArrowLeftRight, Users, Sparkles, LogOut, Crown } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
+import { useWorkspaceStore } from '../store/useWorkspaceStore'
 import { Logo } from './Logo'
 
 const NAV = [
@@ -33,6 +34,7 @@ export function AppShell({ children, maxWidth = 'max-w-3xl' }) {
 
   function handleLogout() {
     logout()
+    useWorkspaceStore.getState().reset()
     navigate('/login', { replace: true })
   }
 
@@ -55,7 +57,19 @@ export function AppShell({ children, maxWidth = 'max-w-3xl' }) {
             ))}
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <NavLink
+              to="/subscription"
+              className={({ isActive }) =>
+                `rounded-lg p-2 transition hover:bg-white/5 ${
+                  isActive ? 'text-neon-purple' : 'text-off-white/50 hover:text-off-white'
+                }`
+              }
+              aria-label="Plan y facturación"
+              title="Plan y facturación"
+            >
+              <Crown size={17} strokeWidth={2.2} />
+            </NavLink>
             <span
               className="grid h-8 w-8 place-items-center rounded-full bg-white/10 text-xs font-semibold text-off-white/80"
               title={user?.email}

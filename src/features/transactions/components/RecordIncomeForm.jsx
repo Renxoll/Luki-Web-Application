@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { useRecordManualIncome } from '../api/useRecordManualIncome'
 import { Button } from '../../../components/Button'
+import { useActiveWorkspace } from '../../workspaces/api/useActiveWorkspace'
 
 const CURRENCY = 'PEN'
 
@@ -10,6 +11,7 @@ export function RecordIncomeForm() {
   const [amount, setAmount] = useState('')
   const [source, setSource] = useState('')
   const { mutate, isPending, isError, reset } = useRecordManualIncome()
+  const { workspace, workspaceIdParam } = useActiveWorkspace()
 
   function close() {
     setIsOpen(false)
@@ -20,7 +22,10 @@ export function RecordIncomeForm() {
 
   function handleSubmit(e) {
     e.preventDefault()
-    mutate({ amount: Number(amount), currency: CURRENCY, source: source.trim() }, { onSuccess: close })
+    mutate(
+      { amount: Number(amount), currency: CURRENCY, source: source.trim(), workspaceId: workspaceIdParam },
+      { onSuccess: close }
+    )
   }
 
   if (!isOpen) {
@@ -38,7 +43,12 @@ export function RecordIncomeForm() {
 
   return (
     <form onSubmit={handleSubmit} className="card space-y-3 p-4">
-      <p className="text-sm font-semibold">¿Cuánto te depositaron?</p>
+      <p className="text-sm font-semibold">
+        ¿Cuánto te depositaron?
+        {workspace && !workspace.isDefault && (
+          <span className="ml-1 font-normal text-off-white/50">· {workspace.name}</span>
+        )}
+      </p>
 
       <div className="flex flex-col gap-2 sm:flex-row">
         <input

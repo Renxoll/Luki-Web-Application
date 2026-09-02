@@ -2,6 +2,7 @@ import { Store, ArrowDownLeft, Clock, XCircle, ArrowLeftRight } from 'lucide-rea
 import { useUpdateTransactionCategory } from '../api/useUpdateTransactionCategory'
 import { useSetInternalTransfer } from '../api/useSetInternalTransfer'
 import { CategorySelect } from './CategorySelect'
+import { MoveTransactionMenu } from './MoveTransactionMenu'
 import { categoryColor } from '../../../lib/category'
 
 const dateFormatter = new Intl.DateTimeFormat('es-PE', { day: '2-digit', month: 'short' })
@@ -18,7 +19,7 @@ const STATUS = {
   FAILED: { label: 'No se pudo procesar', icon: XCircle, cls: 'text-rose-300/80' },
 }
 
-export function TransactionRow({ transaction }) {
+export function TransactionRow({ transaction, workspaces = [], categoryOptions }) {
   const { mutate: recategorize, isPending: isRecategorizing } = useUpdateTransactionCategory()
   const { mutate: setTransfer, isPending: isSettingTransfer } = useSetInternalTransfer()
 
@@ -80,10 +81,19 @@ export function TransactionRow({ transaction }) {
       {canEditCategory && (
         <CategorySelect
           value={transaction.categoryCode}
+          options={categoryOptions}
           disabled={isRecategorizing}
           onChange={(categoryCode) =>
             recategorize({ transactionId: transaction.transactionId, categoryCode })
           }
+        />
+      )}
+
+      {isProcessed && !isTransfer && (
+        <MoveTransactionMenu
+          transaction={transaction}
+          workspaces={workspaces}
+          currentWorkspaceId={transaction.workspaceId}
         />
       )}
 

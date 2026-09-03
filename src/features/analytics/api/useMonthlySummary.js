@@ -5,7 +5,7 @@ const MONTHLY_SUMMARY_ENDPOINT = '/analytics/monthly-summary'
 
 /**
  * @typedef {Object} CategoryBreakdown
- * @property {number} categoryId
+ * @property {string} categoryId
  * @property {string} categoryName
  * @property {number} amount
  * @property {number} percentage
@@ -25,16 +25,19 @@ const MONTHLY_SUMMARY_ENDPOINT = '/analytics/monthly-summary'
  * @property {CurrencySummary[]} currencies
  */
 
-/** @returns {Promise<MonthlySummary>} */
-async function fetchMonthlySummary() {
-  const { data } = await apiClient.get(MONTHLY_SUMMARY_ENDPOINT)
+/** @param {string|null} workspaceId @returns {Promise<MonthlySummary>} */
+async function fetchMonthlySummary(workspaceId) {
+  const { data } = await apiClient.get(MONTHLY_SUMMARY_ENDPOINT, {
+    params: workspaceId ? { workspaceId } : undefined,
+  })
   return data
 }
 
-export function useMonthlySummary() {
+/** `workspaceId` null = módulo General (el backend lo asume por defecto). */
+export function useMonthlySummary(workspaceId = null) {
   return useQuery({
-    queryKey: ['analytics', 'monthly-summary'],
-    queryFn: fetchMonthlySummary,
+    queryKey: ['analytics', 'monthly-summary', workspaceId ?? 'general'],
+    queryFn: () => fetchMonthlySummary(workspaceId),
     staleTime: 5 * 60 * 1000,
   })
 }

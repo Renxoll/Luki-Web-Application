@@ -16,7 +16,9 @@ import { RefreshExpensesButton } from '../../gmailsync/components/RefreshExpense
 import { PendingSendersList } from '../../pendingSenders/components/PendingSendersList'
 import { useAuthStore } from '../../../store/useAuthStore'
 import { AppShell } from '../../../components/AppShell'
-import { categoryColor } from '../../../lib/category'
+import { WorkspaceSwitcher } from '../../workspaces/components/WorkspaceSwitcher'
+import { useActiveWorkspace } from '../../workspaces/api/useActiveWorkspace'
+import { CategoryBreakdownPanel } from '../../analytics/components/CategoryBreakdownPanel'
 
 // A diferencia de antes, la moneda ya no es siempre PEN -- el dashboard ahora puede traer
 // un CurrencySummary por cada moneda con movimiento (ver useMonthlySummary), así que el
@@ -146,56 +148,17 @@ function BreakdownSkeleton() {
   )
 }
 
-function Breakdown({ items, currency }) {
-  if (!items || items.length === 0) {
-    return (
-      <div className="card p-6 text-center text-sm text-off-white/55">
-        Aún no hay gastos categorizados este mes.
-      </div>
-    )
-  }
-  const max = Math.max(...items.map((i) => i.amount), 1)
-
-  return (
-    <ul className="space-y-2.5">
-      {items.map((item) => {
-        const c = categoryColor(item.categoryName)
-        return (
-          <li key={item.categoryId} className="card p-3.5">
-            <div className="flex items-center justify-between gap-3">
-              <span className="flex items-center gap-2 text-sm font-medium">
-                <span className={`h-2.5 w-2.5 rounded-full ${c.bar}`} />
-                {item.categoryName}
-              </span>
-              <span className="text-sm font-semibold">{formatCurrency(item.amount, currency)}</span>
-            </div>
-            <div className="mt-2 flex items-center gap-2">
-              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
-                <div
-                  className={`h-full rounded-full ${c.bar}`}
-                  style={{ width: `${Math.max(4, (item.amount / max) * 100)}%` }}
-                />
-              </div>
-              <span className={`w-10 shrink-0 text-right text-xs ${c.text}`}>
-                {item.percentage.toFixed(0)}%
-              </span>
-            </div>
-          </li>
-        )
-      })}
-    </ul>
-  )
-}
-
 export function Dashboard() {
   const [searchParams] = useSearchParams()
   const inboxAddress = useAuthStore((state) => state.inboxAddress)
   const user = useAuthStore((state) => state.user)
-  const { data, isLoading, isError, error } = useMonthlySummary()
+  const { workspace, workspaceIdParam } = useActiveWorkspace()
+  const { data, isLoading, isError, error } = useMonthlySummary(workspaceIdParam)
   const gmailStatus = searchParams.get('gmail')
 
   const displayName =
     user?.name || user?.displayName || (user?.email || '').split('@')[0]
+  const accentHex = workspace?.colorHex || '#8B5CF6'
 
   return (
     <AppShell maxWidth="max-w-6xl">
@@ -204,8 +167,14 @@ export function Dashboard() {
           <h1 className="text-2xl font-bold tracking-tight">
             Hola{displayName ? `, ${displayName}` : ''}
           </h1>
-          <p className="mt-1 text-sm text-off-white/55">Este es el pulso de tu mes.</p>
+          <p className="mt-1 text-sm text-off-white/55">
+            {workspace && !workspace.isDefault
+              ? `El pulso del módulo “${workspace.name}”.`
+              : 'Este es el pulso de tu mes.'}
+          </p>
         </div>
+
+        <WorkspaceSwitcher className="mt-5" />
 
         {/* Desktop: dos columnas que caben en una pantalla, sin scroll de página.
             Móvil: una sola columna con scroll natural. */}
@@ -246,7 +215,11 @@ export function Dashboard() {
                       )}
                     </div>
                     <div className="lg:max-h-[calc(100vh-24rem)] lg:overflow-y-auto lg:pr-1">
-                      <Breakdown items={currencySummary.breakdown} currency={currencySummary.currency} />
+                      <CategoryBreakdownPanel
+                        items={currencySummary.breakdown}
+                        currency={currencySummary.currency}
+                        accentHex={accentHex}
+                      />
                     </div>
                   </div>
                 </div>

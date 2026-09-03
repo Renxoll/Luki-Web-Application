@@ -15,6 +15,7 @@ const CATEGORIES_ENDPOINT = '/transactions/categories'
  * @property {'EXPENSE'|'INCOME'} type
  * @property {boolean} internalTransfer  transferencia entre cuentas propias (no cuenta en el resumen)
  * @property {string} createdAt
+ * @property {string} workspaceId  módulo al que pertenece la transacción
  */
 
 /**
@@ -26,11 +27,13 @@ const CATEGORIES_ENDPOINT = '/transactions/categories'
  */
 
 /**
- * @param {{page?: number, size?: number}} params
+ * @param {{page?: number, size?: number, workspaceId?: string|null}} params
  * @returns {Promise<TransactionPage>}
  */
-export async function fetchTransactions({ page = 0, size = 20 } = {}) {
-  const { data } = await apiClient.get(TRANSACTIONS_ENDPOINT, { params: { page, size } })
+export async function fetchTransactions({ page = 0, size = 20, workspaceId = null } = {}) {
+  const params = { page, size }
+  if (workspaceId) params.workspaceId = workspaceId
+  const { data } = await apiClient.get(TRANSACTIONS_ENDPOINT, { params })
   return data
 }
 
@@ -57,6 +60,18 @@ export async function updateTransactionCategory(transactionId, categoryCode) {
 }
 
 /**
+ * Mueve la transacción a otro módulo. Para un gasto, `categoryCode` es obligatorio y debe
+ * ser una categoría válida del módulo destino.
+ * @param {string} transactionId
+ * @param {{workspaceId: string, categoryCode?: string}} payload
+ * @returns {Promise<Transaction>}
+ */
+export async function moveTransactionToWorkspace(transactionId, payload) {
+  const { data } = await apiClient.patch(`${TRANSACTIONS_ENDPOINT}/${transactionId}/workspace`, payload)
+  return data
+}
+
+/**
  * Marca o desmarca una transacción como movimiento entre las cuentas propias del usuario
  * (no cuenta como gasto ni ingreso en el resumen).
  * @param {string} transactionId
@@ -72,10 +87,12 @@ export async function setInternalTransfer(transactionId, internalTransfer) {
 }
 
 /**
- * @param {{amount: number, currency: string, source: string}} params
+ * @param {{amount: number, currency: string, source: string, workspaceId?: string|null}} params
  * @returns {Promise<Transaction>}
  */
-export async function recordManualIncome({ amount, currency, source }) {
-  const { data } = await apiClient.post(`${TRANSACTIONS_ENDPOINT}/income`, { amount, currency, source })
+export async function recordManualIncome({ amount, currency, source, workspaceId = null }) {
+  const body = { amount, currency, source }
+  if (workspaceId) body.workspaceId = workspaceId
+  const { data } = await apiClient.post(`${TRANSACTIONS_ENDPOINT}/income`, body)
   return data
 }

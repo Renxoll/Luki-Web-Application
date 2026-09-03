@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { ChevronLeft, ChevronRight, ReceiptText } from 'lucide-react'
 import { useTransactions } from '../api/useTransactions'
 import { TransactionRow } from './TransactionRow'
+import { useWorkspaces } from '../../workspaces/api/useWorkspaces'
+import { useActiveWorkspace } from '../../workspaces/api/useActiveWorkspace'
 
 const PAGE_SIZE = 20
 
@@ -17,7 +19,23 @@ function TransactionListSkeleton() {
 
 export function TransactionList() {
   const [page, setPage] = useState(0)
-  const { data, isLoading, isError, error } = useTransactions({ page, size: PAGE_SIZE })
+  const { data: workspaces = [] } = useWorkspaces()
+  const { workspace, workspaceIdParam } = useActiveWorkspace()
+
+  const { data, isLoading, isError, error } = useTransactions({
+    page,
+    size: PAGE_SIZE,
+    workspaceId: workspaceIdParam,
+  })
+
+  // Para un módulo custom, el selector de categoría de cada fila usa las categorías de ese
+  // módulo; para el General, cae al catálogo global.
+  const categoryOptions =
+    workspace && !workspace.isDefault
+      ? (workspace.categories ?? [])
+          .filter((c) => !c.archived)
+          .map((c) => ({ code: c.code, displayName: c.displayName }))
+      : undefined
 
   if (isLoading) return <TransactionListSkeleton />
 
@@ -37,7 +55,9 @@ export function TransactionList() {
           <ReceiptText size={22} />
         </span>
         <p className="text-sm text-off-white/55">
-          Todavía no hay movimientos. Conecta tu Gmail y aparecerán solos.
+          {workspace && !workspace.isDefault
+            ? `Aún no hay movimientos en “${workspace.name}”. Mueve un gasto acá desde otro módulo.`
+            : 'Todavía no hay movimientos. Conecta tu Gmail y aparecerán solos.'}
         </p>
       </div>
     )
@@ -49,7 +69,12 @@ export function TransactionList() {
     <div className="mt-5">
       <ul className="space-y-2">
         {data.items.map((transaction) => (
-          <TransactionRow key={transaction.transactionId} transaction={transaction} />
+          <TransactionRow
+            key={transaction.transactionId}
+            transaction={transaction}
+            workspaces={workspaces}
+            categoryOptions={categoryOptions}
+          />
         ))}
       </ul>
 

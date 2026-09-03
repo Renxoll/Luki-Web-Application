@@ -11,6 +11,8 @@ import Transactions from '../features/transactions/pages/Transactions'
 import GmailAccounts from '../features/gmailsync/pages/GmailAccounts'
 import Groups from '../features/groups/pages/Groups'
 import GroupDetail from '../features/groups/pages/GroupDetail'
+import Subscription from '../features/subscription/pages/Subscription'
+import CheckoutResult from '../features/subscription/pages/CheckoutResult'
 
 function ProtectedRoute({ children }) {
   const token = useAuthStore((state) => state.token)
@@ -71,6 +73,30 @@ export function AppRouter() {
           element={
             <ProtectedRoute>
               <GroupDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/subscription"
+          element={
+            <ProtectedRoute>
+              <Subscription />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/subscription/success"
+          element={
+            <ProtectedRoute>
+              <CheckoutResult outcome="success" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/subscription/cancel"
+          element={
+            <ProtectedRoute>
+              <CheckoutResult outcome="cancel" />
             </ProtectedRoute>
           }
         />

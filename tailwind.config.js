@@ -50,12 +50,17 @@ export default {
           '0%, 80%, 100%': { transform: 'translateY(0)', opacity: '0.4' },
           '40%': { transform: 'translateY(-4px)', opacity: '1' },
         },
+        'zoom-fade': {
+          '0%': { opacity: '0', transform: 'scale(0.92)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
       },
       animation: {
         'fade-up': 'fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both',
         'fade-in': 'fade-in 0.4s ease-out both',
         float: 'float 6s ease-in-out infinite',
         'dot-bounce': 'dot-bounce 1.4s ease-in-out infinite',
+        'zoom-fade': 'zoom-fade 0.45s cubic-bezier(0.16, 1, 0.3, 1) both',
       },
     },
   },

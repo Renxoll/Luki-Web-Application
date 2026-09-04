@@ -1,8 +1,14 @@
+import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, ArrowLeftRight, Users, Sparkles, LogOut, Crown } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { useWorkspaceStore } from '../store/useWorkspaceStore'
 import { Logo } from './Logo'
+import { LogoutOverlay } from './LogoutOverlay'
+
+// Debe coincidir con la duración de animate-fade-in del velo (ver tailwind.config.js) más
+// un pequeño margen para que el usuario alcance a leer "Cerrando sesión…" antes del salto.
+const LOGOUT_TRANSITION_MS = 550
 
 const NAV = [
   { to: '/dashboard', label: 'Resumen', icon: LayoutDashboard },
@@ -31,11 +37,18 @@ export function AppShell({ children, maxWidth = 'max-w-3xl' }) {
   const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   function handleLogout() {
-    logout()
-    useWorkspaceStore.getState().reset()
-    navigate('/login', { replace: true })
+    if (isLoggingOut) return
+    // El velo se monta primero y recién después de que termina de animarse se limpia la
+    // sesión y se navega -- así el corte a /login no se siente instantáneo.
+    setIsLoggingOut(true)
+    setTimeout(() => {
+      logout()
+      useWorkspaceStore.getState().reset()
+      navigate('/login', { replace: true })
+    }, LOGOUT_TRANSITION_MS)
   }
 
   const initial = (user?.email || 'U').charAt(0).toUpperCase()
@@ -79,7 +92,8 @@ export function AppShell({ children, maxWidth = 'max-w-3xl' }) {
             <button
               type="button"
               onClick={handleLogout}
-              className="rounded-lg p-2 text-off-white/50 transition hover:bg-white/5 hover:text-off-white"
+              disabled={isLoggingOut}
+              className="rounded-lg p-2 text-off-white/50 transition hover:bg-white/5 hover:text-off-white disabled:pointer-events-none disabled:opacity-40"
               aria-label="Cerrar sesión"
             >
               <LogOut size={17} strokeWidth={2.2} />
@@ -98,6 +112,8 @@ export function AppShell({ children, maxWidth = 'max-w-3xl' }) {
           </NavLink>
         ))}
       </nav>
+
+      {isLoggingOut && <LogoutOverlay />}
     </div>
   )
 }

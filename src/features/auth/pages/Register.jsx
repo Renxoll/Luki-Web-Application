@@ -4,15 +4,20 @@ import { AlertCircle } from 'lucide-react'
 import { useRegister } from '../api/useRegister'
 import { AuthLayout } from '../components/AuthLayout'
 import { Button } from '../../../components/Button'
+import { PasswordInput } from '../../../components/PasswordInput'
 
 export function Register() {
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const { mutate, isPending, isError, error } = useRegister()
+
+  const passwordsMismatch = confirmPassword.length > 0 && password !== confirmPassword
 
   function handleSubmit(e) {
     e.preventDefault()
+    if (password !== confirmPassword) return
     mutate({ displayName, email, password })
   }
 
@@ -76,17 +81,34 @@ export function Register() {
           <label htmlFor="password" className="label">
             Contraseña
           </label>
-          <input
+          <PasswordInput
             id="password"
-            type="password"
             autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={8}
-            className="input"
             placeholder="Mínimo 8 caracteres"
           />
+        </div>
+
+        <div>
+          <label htmlFor="confirmPassword" className="label">
+            Confirmar contraseña
+          </label>
+          <PasswordInput
+            id="confirmPassword"
+            autoComplete="new-password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            minLength={8}
+            placeholder="Repite tu contraseña"
+            aria-invalid={passwordsMismatch}
+          />
+          {passwordsMismatch && (
+            <p className="mt-1.5 text-xs text-rose-300">Las contraseñas no coinciden.</p>
+          )}
         </div>
 
         {isError && (
@@ -96,7 +118,7 @@ export function Register() {
           </p>
         )}
 
-        <Button type="submit" loading={isPending} className="w-full">
+        <Button type="submit" loading={isPending} disabled={passwordsMismatch} className="w-full">
           {isPending ? 'Creando cuenta…' : 'Crear cuenta'}
         </Button>
 

@@ -3,6 +3,8 @@ import apiClient from '../../../api/apiClient'
 const SIGN_UP_ENDPOINT = '/iam/sign-up'
 const SIGN_IN_ENDPOINT = '/iam/sign-in'
 const PROFILE_ENDPOINT = '/profiles/me'
+const PASSWORD_RESET_REQUEST_ENDPOINT = '/iam/password-reset/request'
+const PASSWORD_RESET_CONFIRM_ENDPOINT = '/iam/password-reset/confirm'
 
 /**
  * @typedef {Object} AuthResult
@@ -45,4 +47,22 @@ export async function signInAndFetchProfile({ email, password }) {
       inboxAddress: profile.inboxAddress,
     },
   }
+}
+
+/**
+ * Pide el enlace de restablecimiento. El backend responde 202 exista o no la cuenta
+ * (anti-enumeración), así que un éxito acá no confirma que el email esté registrado.
+ * @param {{ email: string }} data
+ */
+export async function requestPasswordReset({ email }) {
+  await apiClient.post(PASSWORD_RESET_REQUEST_ENDPOINT, { email })
+}
+
+/**
+ * Confirma el restablecimiento con el token del enlace del correo y la contraseña nueva.
+ * 400 si el token no es válido / expiró / ya se usó.
+ * @param {{ token: string, password: string }} data
+ */
+export async function confirmPasswordReset({ token, password }) {
+  await apiClient.post(PASSWORD_RESET_CONFIRM_ENDPOINT, { token, password })
 }

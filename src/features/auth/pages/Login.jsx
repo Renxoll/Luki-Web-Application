@@ -4,6 +4,7 @@ import { AlertCircle } from 'lucide-react'
 import { useLogin } from '../api/useLogin'
 import { AuthLayout } from '../components/AuthLayout'
 import { Button } from '../../../components/Button'
+import { PasswordInput } from '../../../components/PasswordInput'
 
 export function Login() {
   const [email, setEmail] = useState('')
@@ -56,17 +57,23 @@ export function Login() {
         </div>
 
         <div>
-          <label htmlFor="password" className="label">
-            Contraseña
-          </label>
-          <input
+          <div className="flex items-baseline justify-between">
+            <label htmlFor="password" className="label">
+              Contraseña
+            </label>
+            <Link
+              to="/forgot-password"
+              className="text-xs font-medium text-neon-purple hover:brightness-125"
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
+          <PasswordInput
             id="password"
-            type="password"
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="input"
             placeholder="••••••••"
           />
         </div>

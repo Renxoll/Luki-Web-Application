@@ -5,6 +5,8 @@ import PrivacyPolicy from '../features/marketing/pages/PrivacyPolicy'
 import Terms from '../features/marketing/pages/Terms'
 import Login from '../features/auth/pages/Login'
 import Register from '../features/auth/pages/Register'
+import ForgotPassword from '../features/auth/pages/ForgotPassword'
+import ResetPassword from '../features/auth/pages/ResetPassword'
 import Dashboard from '../features/dashboard/pages/Dashboard'
 import Advisor from '../features/advisor/pages/Advisor'
 import Transactions from '../features/transactions/pages/Transactions'
@@ -28,6 +30,8 @@ export function AppRouter() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route
           path="/dashboard"
           element={

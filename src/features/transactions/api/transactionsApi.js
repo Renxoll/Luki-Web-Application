@@ -96,3 +96,16 @@ export async function recordManualIncome({ amount, currency, source, workspaceId
   const { data } = await apiClient.post(`${TRANSACTIONS_ENDPOINT}/income`, body)
   return data
 }
+
+/**
+ * Gasto cargado a mano (lo que no llega por correo). `categoryCode` es del catálogo cerrado
+ * si el módulo es el General, o el `code` de una categoría del módulo custom si no.
+ * @param {{amount: number, currency: string, merchant: string, categoryCode: string, workspaceId?: string|null}} params
+ * @returns {Promise<Transaction>}
+ */
+export async function recordManualExpense({ amount, currency, merchant, categoryCode, workspaceId = null }) {
+  const body = { amount, currency, merchant, categoryCode }
+  if (workspaceId) body.workspaceId = workspaceId
+  const { data } = await apiClient.post(`${TRANSACTIONS_ENDPOINT}/expense`, body)
+  return data
+}

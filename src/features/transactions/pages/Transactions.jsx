@@ -1,8 +1,10 @@
 import { RecordIncomeForm } from '../components/RecordIncomeForm'
+import { RecordExpenseForm } from '../components/RecordExpenseForm'
 import { TransactionList } from '../components/TransactionList'
 import { AppShell } from '../../../components/AppShell'
 import { PageHeader } from '../../../components/PageHeader'
 import { WorkspaceSwitcher } from '../../workspaces/components/WorkspaceSwitcher'
+import { SyncStatusBar } from '../../gmailsync/components/SyncStatusBar'
 import { useActiveWorkspace } from '../../workspaces/api/useActiveWorkspace'
 
 export function Transactions() {
@@ -22,7 +24,10 @@ export function Transactions() {
 
         <WorkspaceSwitcher className="mb-4" />
 
-        <div className="mt-1">
+        <SyncStatusBar className="mb-4" />
+
+        <div className="mt-1 space-y-2">
+          <RecordExpenseForm />
           <RecordIncomeForm />
         </div>
         <TransactionList key={workspaceIdParam ?? 'general'} />

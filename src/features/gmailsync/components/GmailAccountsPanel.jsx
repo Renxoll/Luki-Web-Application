@@ -4,25 +4,7 @@ import { useDisconnectGmail } from '../api/useDisconnectGmail'
 import { useGmailConnections } from '../api/useGmailConnections'
 import { useSyncGmail } from '../api/useSyncGmail'
 import { Button } from '../../../components/Button'
-
-const dateFormatter = new Intl.DateTimeFormat('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })
-
-function formatDate(value) {
-  return value ? dateFormatter.format(new Date(value)) : null
-}
-
-function formatRelative(value) {
-  if (!value) return null
-  const minutes = Math.round((Date.now() - new Date(value).getTime()) / 60000)
-  if (minutes < 1) return 'hace un momento'
-  if (minutes < 60) return `hace ${minutes} min`
-  const hours = Math.round(minutes / 60)
-  if (hours < 24) return `hace ${hours} h`
-  const days = Math.round(hours / 24)
-  if (days === 1) return 'ayer'
-  if (days < 30) return `hace ${days} días`
-  return formatDate(value)
-}
+import { formatShortDate, formatRelativeTime } from '../../../lib/relativeTime'
 
 function syncResultMessage({ transactionsIngested, pendingSendersRegistered }) {
   const parts = []
@@ -45,14 +27,14 @@ function GmailAccountRow({ connection, isSyncing }) {
       </span>
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium">{connection.email ?? 'Cuenta sin verificar'}</p>
-        <p className="mt-0.5 text-xs text-off-white/45">Conectada el {formatDate(connection.connectedAt)}</p>
+        <p className="mt-0.5 text-xs text-off-white/45">Conectada el {formatShortDate(connection.connectedAt)}</p>
         <p className="mt-1 text-xs">
           {isSyncing ? (
             <span className="inline-flex items-center gap-1.5 text-emerald-400">
               <Loader2 size={12} className="animate-spin" /> Sincronizando datos…
             </span>
           ) : connection.lastSyncedAt ? (
-            <span className="text-off-white/45">Última lectura {formatRelative(connection.lastSyncedAt)}</span>
+            <span className="text-off-white/45">Última lectura {formatRelativeTime(connection.lastSyncedAt)}</span>
           ) : (
             <span className="text-off-white/35">Sin lecturas todavía</span>
           )}

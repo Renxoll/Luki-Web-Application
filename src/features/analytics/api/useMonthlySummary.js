@@ -38,7 +38,10 @@ export function useMonthlySummary(workspaceId = null) {
   return useQuery({
     queryKey: ['analytics', 'monthly-summary', workspaceId ?? 'general'],
     queryFn: () => fetchMonthlySummary(workspaceId),
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30_000,
+    // Igual que la lista de movimientos: el resumen se actualiza solo cuando entra un gasto
+    // nuevo por detrás, sin necesidad de re-loguear.
+    refetchInterval: 45_000,
   })
 }
 

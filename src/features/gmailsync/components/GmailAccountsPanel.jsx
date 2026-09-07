@@ -1,4 +1,4 @@
-import { Mail, RefreshCw, Loader2, ShieldCheck } from 'lucide-react'
+import { Mail, RefreshCw, Loader2, ShieldCheck, AlertTriangle } from 'lucide-react'
 import { useConnectGmail } from '../api/useConnectGmail'
 import { useDisconnectGmail } from '../api/useDisconnectGmail'
 import { useGmailConnections } from '../api/useGmailConnections'
@@ -19,17 +19,27 @@ function syncResultMessage({ transactionsIngested, pendingSendersRegistered }) {
 
 function GmailAccountRow({ connection, isSyncing }) {
   const { mutate: disconnect, isPending } = useDisconnectGmail()
+  const { mutate: reconnect, isPending: isReconnecting } = useConnectGmail()
+  const needsReconnect = connection.needsReconnect
 
   return (
-    <li className="card flex items-center gap-3 p-4">
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-electric-mint/15 text-electric-mint">
+    <li className={`card flex items-center gap-3 p-4 ${needsReconnect ? 'border-orange-400/30' : ''}`}>
+      <span
+        className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${
+          needsReconnect ? 'bg-orange-400/15 text-orange-300' : 'bg-electric-mint/15 text-electric-mint'
+        }`}
+      >
         <Mail size={18} strokeWidth={2.2} />
       </span>
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium">{connection.email ?? 'Cuenta sin verificar'}</p>
         <p className="mt-0.5 text-xs text-off-white/45">Conectada el {formatShortDate(connection.connectedAt)}</p>
         <p className="mt-1 text-xs">
-          {isSyncing ? (
+          {needsReconnect ? (
+            <span className="inline-flex items-center gap-1.5 text-orange-300">
+              <AlertTriangle size={12} /> El permiso caducó — reconéctala para seguir leyendo tus correos
+            </span>
+          ) : isSyncing ? (
             <span className="inline-flex items-center gap-1.5 text-emerald-400">
               <Loader2 size={12} className="animate-spin" /> Sincronizando datos…
             </span>
@@ -40,6 +50,11 @@ function GmailAccountRow({ connection, isSyncing }) {
           )}
         </p>
       </div>
+      {needsReconnect && (
+        <Button variant="mint" size="sm" onClick={() => reconnect()} loading={isReconnecting} className="shrink-0">
+          {isReconnecting ? 'Abriendo…' : 'Reconectar'}
+        </Button>
+      )}
       <Button
         variant="subtle"
         size="sm"

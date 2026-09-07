@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 import { useMonthlySummary } from '../../analytics/api/useMonthlySummary'
 import { useGmailConnections } from '../../gmailsync/api/useGmailConnections'
-import { RefreshExpensesButton } from '../../gmailsync/components/RefreshExpensesButton'
+import { SyncStatusBar } from '../../gmailsync/components/SyncStatusBar'
 import { PendingSendersList } from '../../pendingSenders/components/PendingSendersList'
 import { useAuthStore } from '../../../store/useAuthStore'
 import { AppShell } from '../../../components/AppShell'
@@ -67,7 +67,7 @@ function GmailCard({ gmailStatus }) {
         <span className="shrink-0 text-xs font-semibold text-electric-mint">Gestionar →</span>
       </Link>
 
-      {count > 0 && <RefreshExpensesButton className="px-1" />}
+      {count > 0 && <SyncStatusBar className="px-1" />}
 
       {gmailStatus === 'connected' && (
         <div className="flex items-center gap-2 rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-3 text-sm text-emerald-300">

@@ -8,6 +8,7 @@ const CONNECTIONS_ENDPOINT = '/gmail/connections'
  * @property {string|null} email
  * @property {string} connectedAt
  * @property {string|null} lastSyncedAt
+ * @property {boolean} needsReconnect  el grant OAuth caducó (revocado o sin scope) -- hay que reconectar
  */
 
 /** @returns {Promise<GmailConnection[]>} */

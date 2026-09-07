@@ -1,13 +1,17 @@
 import { useEffect, useRef } from 'react'
-import { RefreshCw } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { RefreshCw, AlertTriangle } from 'lucide-react'
 import { useSyncGmail } from '../api/useSyncGmail'
 import { useGmailConnections } from '../api/useGmailConnections'
 import { formatRelativeTime } from '../../../lib/relativeTime'
 
-// Cooldown del auto-sync: navegar entre Dashboard y Movimientos no debe volver a leer la
-// bandeja cada vez. Vive a nivel de módulo (no de componente) para que sobreviva a los
-// desmontajes de la navegación client-side.
+// El backend ya lee la bandeja solo: un cron externo pega al keep-alive cada ~10 min y el
+// job programado (@Scheduled) corre cada ~5 min. Así que al abrir la app NO forzamos una
+// lectura salvo que la última haya quedado vieja (STALE_AFTER_MS) -- ahí sí conviene tapar
+// el hueco. El cooldown evita repetir al navegar entre pantallas; ambos viven a nivel de
+// módulo para sobrevivir a los desmontajes de la navegación client-side.
 const AUTO_SYNC_COOLDOWN_MS = 2 * 60 * 1000
+const STALE_AFTER_MS = 6 * 60 * 1000
 let lastAutoSyncAt = 0
 
 function resultMessage({ transactionsIngested, pendingSendersRegistered }) {
@@ -21,35 +25,53 @@ function resultMessage({ transactionsIngested, pendingSendersRegistered }) {
   return parts.length > 0 ? parts.join(' · ') : 'Sin correos nuevos'
 }
 
+function latestSyncedAt(connections) {
+  return connections
+    ?.map((c) => c.lastSyncedAt)
+    .filter(Boolean)
+    .sort()
+    .at(-1)
+}
+
 /**
- * Estado de la lectura de correos + botón de refresco, en una sola barra. Al montarse
- * dispara una lectura automática (si hay alguna cuenta de Gmail y pasó el cooldown): en el
- * plan free de Render el job programado no corre con el server dormido, así que abrir la app
- * es lo que la despierta y sincroniza. Mientras lee muestra "Leyendo tu bandeja…"; en reposo,
- * "Última lectura: hace X" a partir del `lastSyncedAt` de las conexiones.
+ * Estado de la lectura de correos + botón de refresco, en una barra. Muestra "Leyendo tu
+ * bandeja…" mientras sincroniza y "Última lectura: hace X" (de `lastSyncedAt`) en reposo. Al
+ * montarse solo fuerza una lectura si la última quedó vieja (ver arriba): la lectura
+ * periódica ya la hace el backend.
  */
 export function SyncStatusBar({ autoSync = true, className = '' }) {
   const { data: connections } = useGmailConnections()
   const { mutate, isPending, isSuccess, isError, data } = useSyncGmail()
   const hasConnections = (connections?.length ?? 0) > 0
+  const lastSyncedAt = latestSyncedAt(connections)
+  const needsReconnect = connections?.some((c) => c.needsReconnect) ?? false
+  const allNeedReconnect = hasConnections && connections.every((c) => c.needsReconnect)
   const triggeredRef = useRef(false)
 
   useEffect(() => {
-    if (!autoSync || !hasConnections || triggeredRef.current) return
+    if (!autoSync || !hasConnections || allNeedReconnect || triggeredRef.current) return
     if (Date.now() - lastAutoSyncAt < AUTO_SYNC_COOLDOWN_MS) return
+    const fresh = lastSyncedAt && Date.now() - new Date(lastSyncedAt).getTime() < STALE_AFTER_MS
+    if (fresh) return
     triggeredRef.current = true
     lastAutoSyncAt = Date.now()
     // Si falla, se permite reintentar antes (no se "gasta" el cooldown en un intento fallido).
     mutate(undefined, { onError: () => { lastAutoSyncAt = 0 } })
-  }, [autoSync, hasConnections, mutate])
+  }, [autoSync, hasConnections, allNeedReconnect, lastSyncedAt, mutate])
 
   if (!hasConnections) return null
 
-  const lastSyncedAt = connections
-    .map((c) => c.lastSyncedAt)
-    .filter(Boolean)
-    .sort()
-    .at(-1)
+  if (needsReconnect) {
+    return (
+      <div className={`flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-orange-300 ${className}`}>
+        <AlertTriangle size={13} className="shrink-0" />
+        <span>Una cuenta de Gmail necesita reconectarse para seguir leyendo tus correos.</span>
+        <Link to="/gmail-accounts" className="font-semibold underline underline-offset-2">
+          Arreglar
+        </Link>
+      </div>
+    )
+  }
 
   const showResult = isSuccess && !isPending
   const status = isPending

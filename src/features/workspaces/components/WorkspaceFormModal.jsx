@@ -44,7 +44,7 @@ export function WorkspaceFormModal({ open, onClose, workspace, onCreated }) {
   }
 
   return (
-    <Modal open={open} onClose={onClose} title={editing ? 'Editar módulo' : 'Crear módulo'}>
+    <Modal open={open} onClose={onClose} title={editing ? 'Editar módulo' : 'Crear módulo'} center>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="label" htmlFor="workspace-name">

@@ -26,7 +26,7 @@ export function WorkspaceSettingsModal({ open, onClose, workspace, onArchived })
 
   return (
     <>
-      <Modal open={open && !editOpen} onClose={onClose} title="Ajustes del módulo">
+      <Modal open={open && !editOpen} onClose={onClose} title="Ajustes del módulo" maxWidth="max-w-lg" center>
         <div className="space-y-5">
           <div className="flex items-center gap-3">
             <span

@@ -8,6 +8,7 @@ import { InviteMemberForm } from '../components/InviteMemberForm'
 import { AddExpenseForm } from '../components/AddExpenseForm'
 import { ExpensesList } from '../components/ExpensesList'
 import { SimplifiedDebts } from '../components/SimplifiedDebts'
+import { GroupDeletionPanel } from '../components/GroupDeletionPanel'
 
 function GroupDetailSkeleton() {
   return (
@@ -76,7 +77,23 @@ export function GroupDetail() {
           <p className="section-title">Gastos</p>
           <div className="mt-2 space-y-2">
             <AddExpenseForm groupId={groupId} members={group.members} />
-            <ExpensesList expenses={group.expenses} />
+            <ExpensesList
+              expenses={group.expenses}
+              groupId={groupId}
+              ownerId={group.ownerId}
+              members={group.members}
+            />
+          </div>
+        </div>
+
+        <div>
+          <p className="section-title">Zona de riesgo</p>
+          <div className="mt-2">
+            <GroupDeletionPanel
+              groupId={groupId}
+              deletionRequest={group.deletionRequest}
+              members={group.members}
+            />
           </div>
         </div>
       </div>

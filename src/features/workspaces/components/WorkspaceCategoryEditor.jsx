@@ -113,18 +113,8 @@ export function WorkspaceCategoryEditor({ workspace }) {
 
   return (
     <div className="space-y-2">
-      <ul className="space-y-1.5">
-        {active.map((category) => (
-          <CategoryRow
-            key={category.id}
-            workspaceId={workspace.id}
-            category={category}
-            colorHex={workspace.colorHex}
-            canDelete={active.length > 1}
-          />
-        ))}
-      </ul>
-
+      {/* El campo para crear va arriba y siempre visible -- antes quedaba al pie de la lista
+          y con varias categorías había que scrollear el modal para llegar. */}
       <form onSubmit={add} className="flex gap-2">
         <input
           className="input h-9 flex-1 py-1 text-sm"
@@ -142,6 +132,18 @@ export function WorkspaceCategoryEditor({ workspace }) {
           <Plus size={16} strokeWidth={2.5} />
         </button>
       </form>
+
+      <ul className="max-h-64 space-y-1.5 overflow-y-auto pr-1">
+        {active.map((category) => (
+          <CategoryRow
+            key={category.id}
+            workspaceId={workspace.id}
+            category={category}
+            colorHex={workspace.colorHex}
+            canDelete={active.length > 1}
+          />
+        ))}
+      </ul>
     </div>
   )
 }

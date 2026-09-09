@@ -11,7 +11,7 @@ export function Transactions() {
   const { workspace, workspaceIdParam } = useActiveWorkspace()
 
   return (
-    <AppShell>
+    <AppShell maxWidth="max-w-6xl">
       <div className="animate-fade-up">
         <PageHeader
           title="Movimientos"
@@ -22,15 +22,22 @@ export function Transactions() {
           }
         />
 
-        <WorkspaceSwitcher className="mb-4" />
-
+        <WorkspaceSwitcher className="mb-3" />
         <SyncStatusBar className="mb-4" />
 
-        <div className="mt-1 space-y-2">
-          <RecordExpenseForm />
-          <RecordIncomeForm />
+        {/* Escritorio: la lista arranca arriba a la izquierda; registrar gasto/ingreso queda
+            en una columna fija a la derecha -- así no hay que bajar para ver los movimientos.
+            Móvil: una sola columna, las acciones primero y la lista debajo. */}
+        <div className="grid gap-x-6 gap-y-4 lg:grid-cols-3 lg:items-start">
+          <aside className="space-y-2 lg:order-2 lg:sticky lg:top-24">
+            <RecordExpenseForm />
+            <RecordIncomeForm />
+          </aside>
+
+          <div className="min-w-0 lg:order-1 lg:col-span-2">
+            <TransactionList key={workspaceIdParam ?? 'general'} />
+          </div>
         </div>
-        <TransactionList key={workspaceIdParam ?? 'general'} />
       </div>
     </AppShell>
   )

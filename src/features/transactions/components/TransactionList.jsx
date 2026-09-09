@@ -5,7 +5,9 @@ import { TransactionRow } from './TransactionRow'
 import { useWorkspaces } from '../../workspaces/api/useWorkspaces'
 import { useActiveWorkspace } from '../../workspaces/api/useActiveWorkspace'
 
-const PAGE_SIZE = 20
+// Pocas filas por página a propósito: una página entra (casi) en una pantalla de escritorio
+// sin scroll, y el paginador de arriba deja saltar de página sin bajar.
+const PAGE_SIZE = 10
 
 function TransactionListSkeleton() {
   return (
@@ -22,7 +24,7 @@ export function TransactionList() {
   const { data: workspaces = [] } = useWorkspaces()
   const { workspace, workspaceIdParam } = useActiveWorkspace()
 
-  const { data, isLoading, isError, error } = useTransactions({
+  const { data, isLoading, isError, error, isPlaceholderData } = useTransactions({
     page,
     size: PAGE_SIZE,
     workspaceId: workspaceIdParam,
@@ -67,19 +69,9 @@ export function TransactionList() {
 
   return (
     <div className="mt-5">
-      <ul className="space-y-2">
-        {data.items.map((transaction) => (
-          <TransactionRow
-            key={transaction.transactionId}
-            transaction={transaction}
-            workspaces={workspaces}
-            categoryOptions={categoryOptions}
-          />
-        ))}
-      </ul>
-
       {totalPages > 1 && (
-        <div className="mt-5 flex items-center justify-between text-sm text-off-white/55">
+        // Paginador arriba y pegajoso bajo el header: se cambia de página sin scrollear.
+        <div className="sticky top-16 z-20 mb-2 flex items-center justify-between rounded-xl border border-white/10 bg-midnight/85 px-2 py-1.5 text-sm text-off-white/55 backdrop-blur">
           <button
             type="button"
             onClick={() => setPage((p) => Math.max(0, p - 1))}
@@ -89,7 +81,7 @@ export function TransactionList() {
             <ChevronLeft size={16} /> Anterior
           </button>
           <span className="tabular-nums">
-            {page + 1} / {totalPages}
+            Página {page + 1} de {totalPages}
           </span>
           <button
             type="button"
@@ -101,6 +93,17 @@ export function TransactionList() {
           </button>
         </div>
       )}
+
+      <ul className={`space-y-2 transition-opacity ${isPlaceholderData ? 'opacity-60' : ''}`}>
+        {data.items.map((transaction) => (
+          <TransactionRow
+            key={transaction.transactionId}
+            transaction={transaction}
+            workspaces={workspaces}
+            categoryOptions={categoryOptions}
+          />
+        ))}
+      </ul>
     </div>
   )
 }

@@ -26,8 +26,9 @@ export function WorkspaceSwitcher({ className = '' }) {
 
   return (
     <div className={className}>
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {workspaces.map((w) => {
+      <div className="flex items-center gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {workspaces.map((w) => {
           const Icon = resolveIcon(w.icon)
           const isActive = active?.id === w.id
           return (
@@ -60,7 +61,9 @@ export function WorkspaceSwitcher({ className = '' }) {
             </div>
           )
         })}
+        </div>
 
+        {/* Fuera del carrusel: siempre visible, sin tener que scrollear las pastillas. */}
         <button
           type="button"
           onClick={() => setCreateOpen(true)}

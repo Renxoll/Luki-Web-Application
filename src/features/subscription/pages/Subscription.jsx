@@ -27,7 +27,14 @@ const PLANS = [
   },
 ]
 
-function PlanCard({ plan, currentCode, onChoose, isPending }) {
+function checkoutErrorMessage(error) {
+  const status = error?.response?.status
+  if (status === 409) return 'Ya tienes un plan activo. Recarga la página para ver tu plan actual.'
+  if (status === 502) return 'Stripe no respondió. Intenta de nuevo en unos minutos.'
+  return 'No se pudo iniciar el pago. Intenta de nuevo en unos minutos.'
+}
+
+function PlanCard({ plan, currentCode, onChoose, isPending, lockedReason }) {
   const isCurrent = currentCode === plan.code
   const Icon = plan.icon
   return (
@@ -61,9 +68,9 @@ function PlanCard({ plan, currentCode, onChoose, isPending }) {
         ))}
       </ul>
       <div className="mt-5">
-        {isCurrent ? (
+        {isCurrent || lockedReason ? (
           <Button variant="ghost" size="sm" disabled className="w-full">
-            Plan actual
+            {isCurrent ? 'Plan actual' : lockedReason}
           </Button>
         ) : (
           <Button
@@ -132,8 +139,13 @@ export function Subscription() {
         )}
 
         {checkout.isError && (
-          <p className="mb-4 text-sm text-rose-300">
-            No se pudo iniciar el pago. Intenta de nuevo en unos minutos.
+          <p role="alert" className="mb-4 text-sm text-rose-300">
+            {checkoutErrorMessage(checkout.error)}
+          </p>
+        )}
+        {cancel.isError && (
+          <p role="alert" className="mb-4 text-sm text-rose-300">
+            No se pudo cancelar el plan. No se hizo ningún cambio; intenta de nuevo en unos minutos.
           </p>
         )}
 
@@ -144,6 +156,9 @@ export function Subscription() {
               plan={plan}
               currentCode={currentCode}
               isPending={checkout.isPending}
+              // Con Premium activo no se puede "elegir" Gratis: el backend respondería 409. Se
+              // vuelve a Gratis cancelando Premium (botón de arriba).
+              lockedReason={isPremium && plan.code === 'FREE' ? 'Cancela Premium para volver' : null}
               onChoose={(code) => checkout.mutate(code)}
             />
           ))}

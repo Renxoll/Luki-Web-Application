@@ -6,6 +6,7 @@ import { WorkspaceCategoryEditor } from './WorkspaceCategoryEditor'
 import { WorkspaceFormModal } from './WorkspaceFormModal'
 import { useWorkspaceMutations } from '../api/useWorkspaceMutations'
 import { WorkspaceGlyph } from '../lib/WorkspaceGlyph'
+import { workspaceErrorMessage } from '../lib/workspaceError'
 
 /** Ajustes de un módulo: editar nombre/color/ícono, sus categorías, y archivarlo. */
 export function WorkspaceSettingsModal({ open, onClose, workspace, onArchived }) {
@@ -58,6 +59,11 @@ export function WorkspaceSettingsModal({ open, onClose, workspace, onArchived })
                   <p className="text-sm text-off-white/70">
                     Los movimientos de este módulo no se borran, pero el módulo deja de aparecer.
                   </p>
+                  {archive.isError && (
+                    <p role="alert" className="text-sm text-rose-300">
+                      {workspaceErrorMessage(archive.error, 'No se pudo archivar el módulo. Intenta de nuevo.')}
+                    </p>
+                  )}
                   <div className="flex justify-end gap-2">
                     <Button variant="subtle" size="sm" onClick={() => setConfirmArchive(false)} disabled={archive.isPending}>
                       Cancelar

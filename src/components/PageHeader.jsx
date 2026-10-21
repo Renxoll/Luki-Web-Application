@@ -2,11 +2,11 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 
 /** Encabezado de sección: título + subtítulo opcional + acciones a la derecha. */
-export function PageHeader({ title, subtitle, back, actions }) {
+export function PageHeader({ title, subtitle, back, actions, className = 'mb-6' }) {
   const navigate = useNavigate()
 
   return (
-    <div className="mb-6 flex items-start justify-between gap-4">
+    <div className={`flex items-start justify-between gap-4 ${className}`}>
       <div className="flex items-start gap-3">
         {back && (
           <button

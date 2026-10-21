@@ -2,10 +2,11 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { fetchTransactions } from './transactionsApi'
 
 /** `workspaceId` null = módulo General (el backend lo asume por defecto). */
-export function useTransactions({ page = 0, size = 20, workspaceId = null } = {}) {
+export function useTransactions({ page = 0, size = 20, workspaceId = null, enabled = true } = {}) {
   return useQuery({
     queryKey: ['transactions', workspaceId ?? 'general', page, size],
     queryFn: () => fetchTransactions({ page, size, workspaceId }),
+    enabled,
     // Al cambiar de página se mantienen las filas anteriores mientras carga la siguiente --
     // así el paginador no parpadea a esqueleto y no hay que volver a scrollear.
     placeholderData: keepPreviousData,

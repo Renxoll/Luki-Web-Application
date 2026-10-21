@@ -1,7 +1,26 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { FolderInput, ChevronLeft } from 'lucide-react'
 import { useMoveTransaction } from '../api/useMoveTransaction'
 import { resolveIcon } from '../../workspaces/lib/workspaceTheme'
+
+const MENU_WIDTH = 224 // w-56
+const MENU_MAX_HEIGHT = 288
+const VIEWPORT_MARGIN = 8
+
+/**
+ * Posición fija del menú respecto del botón. Se abre hacia abajo y, si no hay espacio (fila
+ * al pie de la pantalla), hacia arriba; nunca se sale horizontalmente del viewport.
+ */
+function computePosition(button) {
+  const rect = button.getBoundingClientRect()
+  const left = Math.min(Math.max(VIEWPORT_MARGIN, rect.right - MENU_WIDTH), window.innerWidth - MENU_WIDTH - VIEWPORT_MARGIN)
+  const spaceBelow = window.innerHeight - rect.bottom
+  if (spaceBelow >= MENU_MAX_HEIGHT || spaceBelow >= rect.top) {
+    return { left, top: rect.bottom + 6, maxHeight: Math.min(MENU_MAX_HEIGHT, spaceBelow - 12) }
+  }
+  return { left, bottom: window.innerHeight - rect.top + 6, maxHeight: Math.min(MENU_MAX_HEIGHT, rect.top - 12) }
+}
 
 /**
  * Menú "mover a módulo" para una fila de transacción. Paso 1: elegir módulo destino.
@@ -11,15 +30,39 @@ import { resolveIcon } from '../../workspaces/lib/workspaceTheme'
 export function MoveTransactionMenu({ transaction, workspaces, currentWorkspaceId }) {
   const [open, setOpen] = useState(false)
   const [target, setTarget] = useState(null)
+  const [position, setPosition] = useState(null)
+  const buttonRef = useRef(null)
   const { mutate, isPending } = useMoveTransaction()
 
   const isIncome = transaction.type === 'INCOME'
   const targets = workspaces.filter((w) => w.id !== currentWorkspaceId)
 
-  function close() {
+  const close = useCallback(() => {
     setOpen(false)
     setTarget(null)
-  }
+  }, [])
+
+  // El menú se pinta en un portal sobre <body>: cada tarjeta tiene backdrop-filter, que crea
+  // su propio contexto de apilamiento, y un menú "absolute" dentro de ella quedaba tapado por
+  // la tarjeta siguiente sin importar su z-index.
+  useLayoutEffect(() => {
+    if (open && buttonRef.current) setPosition(computePosition(buttonRef.current))
+  }, [open, target])
+
+  useEffect(() => {
+    if (!open) return undefined
+    const onKey = (e) => e.key === 'Escape' && close()
+    window.addEventListener('keydown', onKey)
+    // Con la lista scrolleando o la ventana cambiando de tamaño, el botón se mueve: cerrar es
+    // más simple y predecible que reposicionar.
+    window.addEventListener('scroll', close, true)
+    window.addEventListener('resize', close)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('scroll', close, true)
+      window.removeEventListener('resize', close)
+    }
+  }, [open, close])
 
   function move(workspaceId, categoryCode) {
     mutate({ transactionId: transaction.transactionId, workspaceId, categoryCode }, { onSuccess: close })
@@ -36,21 +79,32 @@ export function MoveTransactionMenu({ transaction, workspaces, currentWorkspaceI
   if (targets.length === 0) return null
 
   return (
-    <div className="relative shrink-0">
+    <div className="shrink-0">
       <button
+        ref={buttonRef}
         type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         title="Mover a otro módulo"
         aria-label="Mover a otro módulo"
-        className="grid h-8 w-8 place-items-center rounded-lg text-off-white/40 transition hover:bg-white/[0.08] hover:text-off-white/80"
+        className={`grid h-8 w-8 place-items-center rounded-lg transition ${
+          open ? 'bg-white/[0.1] text-off-white' : 'text-off-white/40 hover:bg-white/[0.08] hover:text-off-white/80'
+        }`}
       >
         <FolderInput size={15} strokeWidth={2.3} />
       </button>
 
-      {open && (
+      {open &&
+        position &&
+        createPortal(
         <>
-          <div className="fixed inset-0 z-40" onClick={close} />
-          <div className="absolute right-0 top-9 z-50 w-56 rounded-xl border border-white/10 bg-midnight-800 p-1.5 shadow-card">
+          <div className="fixed inset-0 z-[60]" onClick={close} />
+          <div
+            role="menu"
+            style={{ ...position, width: MENU_WIDTH }}
+            className="fixed z-[70] overflow-y-auto rounded-xl border border-white/10 bg-midnight-800 p-1.5 shadow-card"
+          >
             {!target && (
               <>
                 <p className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-off-white/40">
@@ -89,7 +143,7 @@ export function MoveTransactionMenu({ transaction, workspaces, currentWorkspaceI
                   <ChevronLeft size={12} strokeWidth={2.6} />
                   {target.name} · categoría
                 </button>
-                <div className="max-h-56 overflow-y-auto">
+                <div>
                   {(target.categories ?? [])
                     .filter((c) => !c.archived)
                     .map((c) => (
@@ -107,7 +161,8 @@ export function MoveTransactionMenu({ transaction, workspaces, currentWorkspaceI
               </>
             )}
           </div>
-        </>
+        </>,
+        document.body
       )}
     </div>
   )

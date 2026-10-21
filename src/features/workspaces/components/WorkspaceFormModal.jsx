@@ -10,6 +10,7 @@ import {
   DEFAULT_WORKSPACE_ICON,
   resolveIcon,
 } from '../lib/workspaceTheme'
+import { workspaceErrorMessage } from '../lib/workspaceError'
 
 /**
  * Alta y edición de un módulo (nombre + color + ícono). `workspace` presente => modo
@@ -111,7 +112,9 @@ export function WorkspaceFormModal({ open, onClose, workspace, onCreated }) {
         </div>
 
         {mutation.isError && (
-          <p className="text-sm text-rose-300">No se pudo guardar el módulo. Intenta de nuevo.</p>
+          <p role="alert" className="text-sm text-rose-300">
+            {workspaceErrorMessage(mutation.error, 'No se pudo guardar el módulo. Intenta de nuevo.')}
+          </p>
         )}
 
         <div className="flex justify-end gap-2 pt-1">

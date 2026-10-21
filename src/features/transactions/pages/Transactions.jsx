@@ -11,9 +11,10 @@ export function Transactions() {
   const { workspace, workspaceIdParam } = useActiveWorkspace()
 
   return (
-    <AppShell maxWidth="max-w-6xl">
-      <div className="animate-fade-up">
+    <AppShell maxWidth="max-w-6xl" fit>
+      <div className="animate-fade-up lg:flex lg:min-h-0 lg:flex-1 lg:flex-col">
         <PageHeader
+          className="mb-6 lg:mb-3"
           title="Movimientos"
           subtitle={
             workspace && !workspace.isDefault
@@ -22,19 +23,19 @@ export function Transactions() {
           }
         />
 
-        <WorkspaceSwitcher className="mb-3" />
-        <SyncStatusBar className="mb-4" />
+        <WorkspaceSwitcher className="mb-3 lg:mb-2" />
+        <SyncStatusBar className="mb-4 lg:mb-3" />
 
         {/* Escritorio: la lista arranca arriba a la izquierda; registrar gasto/ingreso queda
             en una columna fija a la derecha -- así no hay que bajar para ver los movimientos.
             Móvil: una sola columna, las acciones primero y la lista debajo. */}
-        <div className="grid gap-x-6 gap-y-4 lg:grid-cols-3 lg:items-start">
-          <aside className="space-y-2 lg:order-2 lg:sticky lg:top-24">
+        <div className="grid gap-x-6 gap-y-4 lg:min-h-0 lg:flex-1 lg:grid-cols-3 lg:grid-rows-1">
+          <aside className="space-y-2 lg:order-2 lg:min-h-0 lg:overflow-y-auto">
             <RecordExpenseForm />
             <RecordIncomeForm />
           </aside>
 
-          <div className="min-w-0 lg:order-1 lg:col-span-2">
+          <div className="min-w-0 lg:order-1 lg:col-span-2 lg:min-h-0">
             <TransactionList key={workspaceIdParam ?? 'general'} />
           </div>
         </div>

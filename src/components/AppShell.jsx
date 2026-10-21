@@ -32,8 +32,12 @@ function mobileNavClass({ isActive }) {
 /**
  * Layout de las pantallas autenticadas: barra superior con marca + navegación + logout,
  * contenedor central con ancho máximo, y navegación inferior en móvil.
+ *
+ * Con `fit`, en escritorio el contenido ocupa exactamente el alto que deja la barra superior
+ * (sin scroll de página): la pantalla reparte ese alto y mide cuántas filas le caben, en vez
+ * de crecer hacia abajo. En móvil y tablet sigue el scroll natural.
  */
-export function AppShell({ children, maxWidth = 'max-w-3xl' }) {
+export function AppShell({ children, maxWidth = 'max-w-3xl', fit = false }) {
   const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
@@ -102,7 +106,13 @@ export function AppShell({ children, maxWidth = 'max-w-3xl' }) {
         </div>
       </header>
 
-      <main className={`mx-auto px-4 py-8 sm:px-6 ${maxWidth}`}>{children}</main>
+      <main
+        className={`mx-auto px-4 py-8 sm:px-6 ${maxWidth} ${
+          fit ? 'lg:flex lg:h-[calc(100dvh-4rem-1px)] lg:flex-col lg:overflow-hidden lg:py-4' : ''
+        }`}
+      >
+        {children}
+      </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-30 flex border-t border-white/10 bg-midnight/95 backdrop-blur-xl sm:hidden">
         {NAV.map(({ to, label, icon: Icon }) => (

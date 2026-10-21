@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Plus, Pencil, Trash2, Check, X } from 'lucide-react'
 import { useWorkspaceMutations } from '../api/useWorkspaceMutations'
 import { WorkspaceGlyph } from '../lib/WorkspaceGlyph'
+import { workspaceErrorMessage } from '../lib/workspaceError'
 
 function CategoryRow({ workspaceId, category, colorHex, canDelete }) {
   const { updateCategory, archiveCategory } = useWorkspaceMutations()
@@ -21,8 +22,14 @@ function CategoryRow({ workspaceId, category, colorHex, canDelete }) {
     )
   }
 
+  const rowError = updateCategory.isError
+    ? workspaceErrorMessage(updateCategory.error, 'No se pudo renombrar la categoría. Intenta de nuevo.')
+    : archiveCategory.isError
+      ? workspaceErrorMessage(archiveCategory.error, 'No se pudo archivar la categoría. Intenta de nuevo.')
+      : null
+
   return (
-    <li className="flex items-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.03] px-3 py-2">
+    <li className="flex flex-wrap items-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.03] px-3 py-2">
       <span
         className="grid h-7 w-7 shrink-0 place-items-center rounded-lg"
         style={{ backgroundColor: `${colorHex}22`, color: colorHex }}
@@ -94,6 +101,12 @@ function CategoryRow({ workspaceId, category, colorHex, canDelete }) {
           </button>
         </>
       )}
+
+      {rowError && (
+        <p role="alert" className="basis-full text-xs text-rose-300">
+          {rowError}
+        </p>
+      )}
     </li>
   )
 }
@@ -132,6 +145,12 @@ export function WorkspaceCategoryEditor({ workspace }) {
           <Plus size={16} strokeWidth={2.5} />
         </button>
       </form>
+
+      {addCategory.isError && (
+        <p role="alert" className="text-xs text-rose-300">
+          {workspaceErrorMessage(addCategory.error, 'No se pudo agregar la categoría. Intenta de nuevo.')}
+        </p>
+      )}
 
       <ul className="max-h-64 space-y-1.5 overflow-y-auto pr-1">
         {active.map((category) => (

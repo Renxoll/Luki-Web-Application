@@ -31,7 +31,7 @@ export function TransactionRow({ transaction, workspaces = [], categoryOptions }
   const c = categoryColor(transaction.category || transaction.merchant || '')
 
   return (
-    <li className={`card card-hover flex items-center gap-3 p-3.5 ${isTransfer ? 'opacity-60' : ''}`}>
+    <li className={`card card-hover flex flex-wrap items-center gap-x-3 gap-y-2 p-3.5 sm:flex-nowrap ${isTransfer ? 'opacity-60' : ''}`}>
       <span
         className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${
           isTransfer
@@ -78,47 +78,51 @@ export function TransactionRow({ transaction, workspaces = [], categoryOptions }
         </p>
       </div>
 
-      {canEditCategory && (
-        <CategorySelect
-          value={transaction.categoryCode}
-          options={categoryOptions}
-          disabled={isRecategorizing}
-          onChange={(categoryCode) =>
-            recategorize({ transactionId: transaction.transactionId, categoryCode })
-          }
-        />
-      )}
+      {/* Acciones: en pantallas chicas bajan a una segunda línea (antes se apretaban contra el
+          monto y el nombre se truncaba a casi nada); desde sm vuelven a la misma línea. */}
+      <div className="order-last flex basis-full items-center justify-end gap-1.5 border-t border-white/[0.06] pt-2 sm:order-none sm:basis-auto sm:border-0 sm:pt-0 empty:hidden">
+        {canEditCategory && (
+          <CategorySelect
+            value={transaction.categoryCode}
+            options={categoryOptions}
+            disabled={isRecategorizing}
+            onChange={(categoryCode) =>
+              recategorize({ transactionId: transaction.transactionId, categoryCode })
+            }
+          />
+        )}
 
-      {isProcessed && !isTransfer && (
-        <MoveTransactionMenu
-          transaction={transaction}
-          workspaces={workspaces}
-          currentWorkspaceId={transaction.workspaceId}
-        />
-      )}
+        {isProcessed && !isTransfer && (
+          <MoveTransactionMenu
+            transaction={transaction}
+            workspaces={workspaces}
+            currentWorkspaceId={transaction.workspaceId}
+          />
+        )}
 
-      {isProcessed && (
-        <button
-          type="button"
-          onClick={() =>
-            setTransfer({ transactionId: transaction.transactionId, internalTransfer: !isTransfer })
-          }
-          disabled={isSettingTransfer}
-          title={
-            isTransfer
-              ? 'Volver a contar como movimiento normal'
-              : 'Marcar como transferencia entre mis cuentas (no cuenta en el resumen)'
-          }
-          className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg transition disabled:opacity-50 ${
-            isTransfer
-              ? 'bg-neon-purple/20 text-neon-purple'
-              : 'text-off-white/40 hover:bg-white/[0.08] hover:text-off-white/80'
-          }`}
-          aria-pressed={isTransfer}
-        >
-          <ArrowLeftRight size={15} strokeWidth={2.3} />
-        </button>
-      )}
+        {isProcessed && (
+          <button
+            type="button"
+            onClick={() =>
+              setTransfer({ transactionId: transaction.transactionId, internalTransfer: !isTransfer })
+            }
+            disabled={isSettingTransfer}
+            title={
+              isTransfer
+                ? 'Volver a contar como movimiento normal'
+                : 'Marcar como transferencia entre mis cuentas (no cuenta en el resumen)'
+            }
+            className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg transition disabled:opacity-50 ${
+              isTransfer
+                ? 'bg-neon-purple/20 text-neon-purple'
+                : 'text-off-white/40 hover:bg-white/[0.08] hover:text-off-white/80'
+            }`}
+            aria-pressed={isTransfer}
+          >
+            <ArrowLeftRight size={15} strokeWidth={2.3} />
+          </button>
+        )}
+      </div>
 
       {isIncome && isProcessed && !isTransfer && (
         <span className="chip shrink-0 border-emerald-500/30 bg-emerald-500/10 text-emerald-300">

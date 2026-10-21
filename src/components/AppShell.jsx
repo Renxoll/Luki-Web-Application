@@ -108,7 +108,7 @@ export function AppShell({ children, maxWidth = 'max-w-3xl', fit = false }) {
 
       <main
         className={`mx-auto px-4 py-8 sm:px-6 ${maxWidth} ${
-          fit ? 'lg:flex lg:h-[calc(100dvh-4rem)] lg:flex-col lg:overflow-hidden lg:py-4' : ''
+          fit ? 'lg:flex lg:h-[calc(100dvh-4rem-1px)] lg:flex-col lg:overflow-hidden lg:py-4' : ''
         }`}
       >
         {children}

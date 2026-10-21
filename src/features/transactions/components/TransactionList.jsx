@@ -4,30 +4,47 @@ import { useTransactions } from '../api/useTransactions'
 import { TransactionRow } from './TransactionRow'
 import { useWorkspaces } from '../../workspaces/api/useWorkspaces'
 import { useActiveWorkspace } from '../../workspaces/api/useActiveWorkspace'
+import { useFitCount } from '../../../lib/useFitCount'
 
-// Pocas filas por página a propósito: una página entra (casi) en una pantalla de escritorio
-// sin scroll, y el paginador de arriba deja saltar de página sin bajar.
-const PAGE_SIZE = 10
+// Fuera de escritorio la página trae 10 filas y se scrollea de forma natural.
+const MOBILE_PAGE_SIZE = 10
+// En escritorio cada fila mide 56px (lg:h-14 en TransactionRow) más 8px de separación: el
+// tamaño de página es lo que entra en el alto disponible, así nunca hay que scrollear.
+const DESKTOP_ROW_PITCH = 64
 
-function TransactionListSkeleton() {
+function TransactionListSkeleton({ rows }) {
   return (
-    <div className="mt-5 space-y-2">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="h-[70px] animate-pulse rounded-2xl bg-white/[0.05]" />
+    <div className="space-y-2">
+      {Array.from({ length: rows }).map((_, i) => (
+        <div key={i} className="h-14 animate-pulse rounded-2xl bg-white/[0.05]" />
       ))}
     </div>
   )
 }
 
 export function TransactionList() {
-  const [page, setPage] = useState(0)
+  // La página se guarda junto con el tamaño con el que se eligió: si el tamaño cambia (la
+  // ventana se redimensiona) deja de significar lo mismo y se vuelve a la primera, sin efectos.
+  const [pageState, setPageState] = useState({ page: 0, size: null })
   const { data: workspaces = [] } = useWorkspaces()
   const { workspace, workspaceIdParam } = useActiveWorkspace()
+  const { ref, isDesktop, count: pageSize } = useFitCount({
+    itemHeight: DESKTOP_ROW_PITCH,
+    fallback: MOBILE_PAGE_SIZE,
+    min: 3,
+    max: 30,
+  })
+
+  const page = pageState.size === pageSize ? pageState.page : 0
+  const setPage = (update) =>
+    setPageState({ page: typeof update === 'function' ? update(page) : update, size: pageSize })
 
   const { data, isLoading, isError, error, isPlaceholderData } = useTransactions({
     page,
-    size: PAGE_SIZE,
+    size: pageSize ?? MOBILE_PAGE_SIZE,
     workspaceId: workspaceIdParam,
+    // En escritorio se espera a medir: pedir con un tamaño provisional y luego otro serían dos consultas.
+    enabled: pageSize != null,
   })
 
   // Para un módulo custom, el selector de categoría de cada fila usa las categorías de ese
@@ -39,20 +56,25 @@ export function TransactionList() {
           .map((c) => ({ code: c.code, displayName: c.displayName }))
       : undefined
 
-  if (isLoading) return <TransactionListSkeleton />
+  const totalPages = data ? Math.max(1, Math.ceil(data.totalElements / (pageSize ?? MOBILE_PAGE_SIZE))) : 1
 
-  if (isError) {
-    return (
-      <div className="card mt-5 border-orange-400/25 bg-orange-400/10 p-6">
+  // El paginador de escritorio se reserva siempre (aunque haya una sola página): si apareciera
+  // y desapareciera, cambiaría el alto de la lista y con él el tamaño de página.
+  const showPager = isDesktop || totalPages > 1
+
+  let body
+  if (pageSize == null || isLoading) {
+    body = <TransactionListSkeleton rows={isDesktop ? 6 : 4} />
+  } else if (isError) {
+    body = (
+      <div className="card border-orange-400/25 bg-orange-400/10 p-6">
         <p className="font-semibold text-orange-300">No pudimos cargar tus transacciones</p>
         <p className="mt-1 text-sm text-off-white/60">{error?.message || 'Inténtalo de nuevo en unos minutos.'}</p>
       </div>
     )
-  }
-
-  if (!data || data.items.length === 0) {
-    return (
-      <div className="card mt-5 flex flex-col items-center gap-3 p-10 text-center">
+  } else if (!data || data.items.length === 0) {
+    body = (
+      <div className="card flex flex-col items-center gap-3 p-10 text-center">
         <span className="grid h-12 w-12 place-items-center rounded-2xl bg-white/[0.06] text-off-white/40">
           <ReceiptText size={22} />
         </span>
@@ -63,15 +85,26 @@ export function TransactionList() {
         </p>
       </div>
     )
+  } else {
+    body = (
+      <ul className={`space-y-2 transition-opacity ${isPlaceholderData ? 'opacity-60' : ''}`}>
+        {data.items.map((transaction) => (
+          <TransactionRow
+            key={transaction.transactionId}
+            transaction={transaction}
+            workspaces={workspaces}
+            categoryOptions={categoryOptions}
+          />
+        ))}
+      </ul>
+    )
   }
 
-  const totalPages = Math.max(1, Math.ceil(data.totalElements / PAGE_SIZE))
-
   return (
-    <div className="mt-5">
-      {totalPages > 1 && (
-        // Paginador arriba y pegajoso bajo el header: se cambia de página sin scrollear.
-        <div className="sticky top-16 z-20 mb-2 flex items-center justify-between rounded-xl border border-white/10 bg-midnight/85 px-2 py-1.5 text-sm text-off-white/55 backdrop-blur">
+    <div className="mt-5 lg:mt-0 lg:flex lg:h-full lg:min-h-0 lg:flex-col">
+      {showPager && (
+        // Paginador arriba (fuera de la zona medida): se cambia de página sin scrollear.
+        <div className="mb-2 flex shrink-0 items-center justify-between rounded-xl border border-white/10 bg-midnight/85 px-2 py-1.5 text-sm text-off-white/55 backdrop-blur max-lg:sticky max-lg:top-16 max-lg:z-20">
           <button
             type="button"
             onClick={() => setPage((p) => Math.max(0, p - 1))}
@@ -94,16 +127,10 @@ export function TransactionList() {
         </div>
       )}
 
-      <ul className={`space-y-2 transition-opacity ${isPlaceholderData ? 'opacity-60' : ''}`}>
-        {data.items.map((transaction) => (
-          <TransactionRow
-            key={transaction.transactionId}
-            transaction={transaction}
-            workspaces={workspaces}
-            categoryOptions={categoryOptions}
-          />
-        ))}
-      </ul>
+      {/* Zona medida: en escritorio recibe el alto que sobra y recorta lo que no entre. */}
+      <div ref={ref} className="lg:min-h-0 lg:flex-1 lg:overflow-hidden">
+        {body}
+      </div>
     </div>
   )
 }

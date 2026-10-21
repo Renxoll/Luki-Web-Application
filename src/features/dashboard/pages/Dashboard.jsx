@@ -86,7 +86,7 @@ function GmailCard({ gmailStatus }) {
 }
 
 function HeroSkeleton() {
-  return <div className="h-44 animate-pulse rounded-2xl bg-white/[0.05]" />
+  return <div className="h-44 animate-pulse rounded-2xl bg-white/[0.05] lg:h-32" />
 }
 
 function Hero({ data }) {
@@ -99,13 +99,13 @@ function Hero({ data }) {
   const spentMore = variation != null && variation > 0
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/50 p-6 shadow-card backdrop-blur-sm">
+    <div className="relative shrink-0 overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/50 p-6 shadow-card backdrop-blur-sm lg:p-4">
       <div className="absolute inset-0 -z-10 bg-brand-fade" />
       <div className="absolute -right-16 -top-16 -z-10 h-48 w-48 rounded-full bg-neon-purple/25 blur-3xl" />
 
       <p className="section-title">Balance neto de este mes {data.currency !== 'PEN' && `(${data.currency})`}</p>
       <p
-        className={`mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl ${
+        className={`mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl lg:mt-1 lg:text-4xl ${
           positive ? 'text-off-white' : 'text-rose-300'
         }`}
       >
@@ -113,7 +113,7 @@ function Hero({ data }) {
         {formatCurrency(Math.abs(net), data.currency)}
       </p>
 
-      <div className="mt-4 flex flex-wrap items-center gap-2">
+      <div className="mt-4 flex flex-wrap items-center gap-2 lg:mt-3">
         <span className="chip">
           <ArrowDownRight size={13} className="text-emerald-400" />
           Ingresos {formatCurrency(data.totalIncome, data.currency)}
@@ -161,8 +161,8 @@ export function Dashboard() {
   const accentHex = workspace?.colorHex || '#8B5CF6'
 
   return (
-    <AppShell maxWidth="max-w-6xl">
-      <div className="animate-fade-up">
+    <AppShell maxWidth="max-w-6xl" fit>
+      <div className="animate-fade-up lg:flex lg:min-h-0 lg:flex-1 lg:flex-col">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
             Hola{displayName ? `, ${displayName}` : ''}
@@ -174,12 +174,12 @@ export function Dashboard() {
           </p>
         </div>
 
-        <WorkspaceSwitcher className="mt-5" />
+        <WorkspaceSwitcher className="mt-5 lg:mt-3" />
 
         {/* Desktop: dos columnas que caben en una pantalla, sin scroll de página.
             Móvil: una sola columna con scroll natural. */}
-        <div className="mt-6 grid gap-6 lg:grid-cols-3 lg:items-start">
-          <div className="space-y-6 lg:col-span-2">
+        <div className="mt-6 grid gap-6 lg:mt-4 lg:min-h-0 lg:flex-1 lg:grid-cols-3 lg:grid-rows-1 lg:gap-5">
+          <div className="space-y-6 lg:col-span-2 lg:flex lg:min-h-0 lg:flex-col lg:gap-4 lg:space-y-0">
             {isLoading && <HeroSkeleton />}
             {isError && (
               <div className="card border-orange-400/25 bg-orange-400/10 p-6">
@@ -197,11 +197,11 @@ export function Dashboard() {
             {!isLoading &&
               !isError &&
               data?.currencies.map((currencySummary, index) => (
-                <div key={currencySummary.currency} className="space-y-6">
+                <div key={currencySummary.currency} className="space-y-6 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:gap-3 lg:space-y-0">
                   <Hero data={currencySummary} />
 
-                  <div className="flex min-h-0 flex-col">
-                    <div className="mb-3 flex items-center justify-between">
+                  <div className="flex min-h-0 flex-col lg:flex-1">
+                    <div className="mb-3 flex shrink-0 items-center justify-between lg:mb-2">
                       <h2 className="section-title">
                         Gastos por categoría{data.currencies.length > 1 ? ` · ${currencySummary.currency}` : ''}
                       </h2>
@@ -214,7 +214,7 @@ export function Dashboard() {
                         </Link>
                       )}
                     </div>
-                    <div className="lg:max-h-[calc(100vh-24rem)] lg:overflow-y-auto lg:pr-1">
+                    <div className="lg:min-h-0 lg:flex-1">
                       <CategoryBreakdownPanel
                         items={currencySummary.breakdown}
                         currency={currencySummary.currency}
@@ -226,13 +226,13 @@ export function Dashboard() {
               ))}
           </div>
 
-          <div className="space-y-4 lg:sticky lg:top-24">
+          <div className="space-y-4 lg:min-h-0 lg:space-y-3 lg:overflow-y-auto">
             <GmailCard gmailStatus={gmailStatus} />
             <InboxBanner inboxAddress={inboxAddress} />
             <PendingSendersList />
 
             <div className="card card-hover overflow-hidden">
-              <Link to="/advisor" className="flex items-center gap-4 p-5">
+              <Link to="/advisor" className="flex items-center gap-4 p-5 lg:p-4">
                 <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-brand-gradient text-white shadow-glow">
                   <Sparkles size={22} strokeWidth={2.2} />
                 </span>

@@ -72,6 +72,19 @@ export async function moveTransactionToWorkspace(transactionId, payload) {
 }
 
 /**
+ * Completa a mano un gasto que Luki no pudo leer (FAILED: monto + comercio + categoría
+ * obligatorios) o corrige el monto y el comercio de uno ya leído (la categoría se ignora).
+ * 409 si la transacción sigue procesándose, es un ingreso o es una transferencia propia.
+ * @param {string} transactionId
+ * @param {{amount: number, merchant: string, categoryCode?: string, currency?: string}} payload
+ * @returns {Promise<Transaction>}
+ */
+export async function correctTransactionDetails(transactionId, payload) {
+  const { data } = await apiClient.patch(`${TRANSACTIONS_ENDPOINT}/${transactionId}/details`, payload)
+  return data
+}
+
+/**
  * Marca o desmarca una transacción como movimiento entre las cuentas propias del usuario
  * (no cuenta como gasto ni ingreso en el resumen).
  * @param {string} transactionId

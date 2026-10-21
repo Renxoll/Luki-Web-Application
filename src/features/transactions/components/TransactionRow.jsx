@@ -1,8 +1,11 @@
-import { Store, ArrowDownLeft, Clock, XCircle, ArrowLeftRight } from 'lucide-react'
+import { useState } from 'react'
+import { Store, ArrowDownLeft, Clock, XCircle, ArrowLeftRight, PencilLine } from 'lucide-react'
 import { useUpdateTransactionCategory } from '../api/useUpdateTransactionCategory'
 import { useSetInternalTransfer } from '../api/useSetInternalTransfer'
 import { CategorySelect } from './CategorySelect'
 import { MoveTransactionMenu } from './MoveTransactionMenu'
+import { CompleteExpenseModal } from './CompleteExpenseModal'
+import { isUnknownMerchant, needsManualDetails } from '../lib/unknownMerchant'
 import { categoryColor } from '../../../lib/category'
 
 const dateFormatter = new Intl.DateTimeFormat('es-PE', { day: '2-digit', month: 'short' })
@@ -23,17 +26,24 @@ export function TransactionRow({ transaction, workspaces = [], categoryOptions }
   const { mutate: recategorize, isPending: isRecategorizing } = useUpdateTransactionCategory()
   const { mutate: setTransfer, isPending: isSettingTransfer } = useSetInternalTransfer()
 
+  const [completeOpen, setCompleteOpen] = useState(false)
   const status = STATUS[transaction.status]
   const isProcessed = transaction.status === 'PROCESSED'
   const isIncome = transaction.type === 'INCOME'
   const isTransfer = !!transaction.internalTransfer
   const canEditCategory = isProcessed && !isIncome && !isTransfer
   const c = categoryColor(transaction.category || transaction.merchant || '')
+  const manualDetails = needsManualDetails(transaction)
+  const displayName = isUnknownMerchant(transaction.merchant)
+    ? isIncome
+      ? 'Ingreso'
+      : 'Comercio desconocido'
+    : transaction.merchant
 
   return (
-    <li className={`card card-hover flex flex-wrap items-center gap-x-3 gap-y-2 p-3.5 sm:flex-nowrap ${isTransfer ? 'opacity-60' : ''}`}>
+    <li className={`card card-hover flex flex-wrap items-center gap-x-3 gap-y-2 px-3.5 py-3 sm:flex-nowrap lg:h-14 lg:py-0 ${isTransfer ? 'opacity-60' : ''}`}>
       <span
-        className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${
+        className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${
           isTransfer
             ? 'bg-white/[0.06] text-off-white/50'
             : isIncome
@@ -51,9 +61,7 @@ export function TransactionRow({ transaction, workspaces = [], categoryOptions }
       </span>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate font-medium">
-          {transaction.merchant || (isIncome ? 'Ingreso' : 'Comercio desconocido')}
-        </p>
+        <p className="truncate text-sm font-medium">{displayName}</p>
         <p className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-off-white/45">
           {dateFormatter.format(new Date(transaction.createdAt))}
           {status && (
@@ -67,6 +75,19 @@ export function TransactionRow({ transaction, workspaces = [], categoryOptions }
             <>
               <span>·</span>
               <span className="text-off-white/55">Transferencia propia · no cuenta</span>
+            </>
+          )}
+          {manualDetails && (
+            <>
+              <span>·</span>
+              <button
+                type="button"
+                onClick={() => setCompleteOpen(true)}
+                className="inline-flex items-center gap-1 font-semibold text-neon-purple transition hover:brightness-125"
+              >
+                <PencilLine size={12} strokeWidth={2.4} />
+                {transaction.status === 'FAILED' ? 'Completar a mano' : 'Agregar comercio'}
+              </button>
             </>
           )}
           {!status && !isTransfer && !isIncome && transaction.category && (
@@ -143,6 +164,9 @@ export function TransactionRow({ transaction, workspaces = [], categoryOptions }
           ? `${isIncome && !isTransfer ? '+' : ''}${formatAmount(transaction.amount, transaction.currency)}`
           : '—'}
       </p>
+      {completeOpen && (
+        <CompleteExpenseModal open onClose={() => setCompleteOpen(false)} transaction={transaction} />
+      )}
     </li>
   )
 }

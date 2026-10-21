@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Sparkles, SendHorizonal } from 'lucide-react'
 import { useAskAdvisor } from '../api/useAskAdvisor'
+import { Markdown } from '../../../components/Markdown'
 
 const WELCOME_MESSAGE = {
   role: 'luki',
@@ -94,13 +95,15 @@ export function AdvisorChat() {
             >
               {msg.role === 'luki' && <LukiAvatar />}
               <div
-                className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                  msg.role === 'user' ? 'whitespace-pre-wrap' : ''
+                } ${
                   msg.role === 'user'
                     ? 'rounded-br-md bg-white/10 text-off-white'
                     : 'rounded-bl-md border border-electric-mint/25 bg-electric-mint/[0.07] text-off-white'
                 }`}
               >
-                {msg.content}
+                {msg.role === 'luki' ? <Markdown>{msg.content}</Markdown> : msg.content}
               </div>
             </div>
           ))}

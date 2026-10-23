@@ -5,6 +5,7 @@ import { useConfirmPasswordReset } from '../api/usePasswordReset'
 import { AuthLayout } from '../components/AuthLayout'
 import { Button } from '../../../components/Button'
 import { PasswordInput } from '../../../components/PasswordInput'
+import { FieldLabel } from '../../../components/Field'
 
 const REDIRECT_AFTER_SUCCESS_MS = 2500
 
@@ -74,9 +75,7 @@ export function ResetPassword() {
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="password" className="label">
-            Contraseña nueva
-          </label>
+          <FieldLabel id="password" label="Contraseña nueva" help="auth.newPassword" />
           <PasswordInput
             id="password"
             autoComplete="new-password"
@@ -89,9 +88,7 @@ export function ResetPassword() {
         </div>
 
         <div>
-          <label htmlFor="confirmPassword" className="label">
-            Confirmar contraseña
-          </label>
+          <FieldLabel id="confirmPassword" label="Confirmar contraseña" help="auth.confirmPassword" />
           <PasswordInput
             id="confirmPassword"
             autoComplete="new-password"

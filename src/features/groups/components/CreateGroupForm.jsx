@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useCreateGroup } from '../api/useCreateGroup'
 import { Button } from '../../../components/Button'
+import { FieldLabel } from '../../../components/Field'
 
 export function CreateGroupForm() {
   const [isOpen, setIsOpen] = useState(false)
@@ -36,9 +37,10 @@ export function CreateGroupForm() {
 
   return (
     <form onSubmit={handleSubmit} className="card space-y-3 p-4">
-      <p className="text-sm font-semibold">¿Cómo se llama el grupo?</p>
-
+      <div>
+        <FieldLabel id="group-name" label="¿Cómo se llama el grupo?" help="groups.name" />
       <input
+        id="group-name"
         type="text"
         required
         autoFocus
@@ -47,6 +49,7 @@ export function CreateGroupForm() {
         placeholder="ej. Viaje a Cusco, Depa con Juan"
         className="input"
       />
+      </div>
 
       {isError && <p className="text-sm text-rose-300">No se pudo crear el grupo. Intenta de nuevo.</p>}
 

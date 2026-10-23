@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { sequentialSteps, withAlpha } from '../../../lib/colorScale'
 import { useFitCount } from '../../../lib/useFitCount'
 
-// En escritorio cada categoría es una fila de una línea: 44px de alto + 6px de separación.
-const COMPACT_ROW_PITCH = 50
+// En modo compacto cada categoría es una fila de una línea: 40px de alto + 6px de separación.
+const COMPACT_ROW_PITCH = 46
 
 function formatCurrency(amount, currency = 'PEN') {
   return new Intl.NumberFormat('es-PE', { style: 'currency', currency }).format(amount ?? 0)
@@ -16,9 +16,12 @@ function formatCurrency(amount, currency = 'PEN') {
  * parte-sobre-el-total con separadores de 2px entre segmentos; abajo, las categorías
  * ordenadas con barra fina, extremo redondeado anclado a la izquierda y valor + % directos.
  */
-export function CategoryBreakdownPanel({ items, currency, accentHex = '#8B5CF6' }) {
+export function CategoryBreakdownPanel({ items, currency, accentHex = '#8B5CF6', fit = false }) {
   const [hovered, setHovered] = useState(null)
-  const { ref, isDesktop, count: fitCount } = useFitCount({ itemHeight: COMPACT_ROW_PITCH, fallback: null, min: 2, max: 40 })
+  // Con `fit` el panel se reparte el alto que le deja la pantalla (en cualquier tamaño) y solo
+  // pinta las categorías que entran; sin `fit` muestra todas y la página scrollea.
+  const { ref, count: fitCount } = useFitCount({ itemHeight: COMPACT_ROW_PITCH, fallback: null, min: 0, max: 40, always: fit })
+  const compact = fit
 
   if (!items || items.length === 0) {
     return (
@@ -33,17 +36,19 @@ export function CategoryBreakdownPanel({ items, currency, accentHex = '#8B5CF6' 
   const max = Math.max(...sorted.map((i) => i.amount), 1)
   const total = sorted.reduce((sum, i) => sum + (i.amount ?? 0), 0)
 
-  // En escritorio solo se pintan las categorías que entran en el alto disponible; el resto se
-  // resume en una última fila "N categorías más" (con su monto) en vez de obligar a scrollear.
-  const overflowing = isDesktop && fitCount != null && sorted.length > fitCount
-  const visible = overflowing ? sorted.slice(0, Math.max(1, fitCount - 1)) : sorted
-  const hiddenItems = overflowing ? sorted.slice(visible.length) : []
+  // Las que no entran se resumen en una última fila "N categorías más" (con su monto) en vez
+  // de obligar a scrollear.
+  const overflowing = compact && fitCount != null && sorted.length > fitCount
+  // Una fila del cupo se la lleva el resumen; si no entra ni una, no se pinta nada.
+  const shownCount = overflowing ? Math.max(0, fitCount - 1) : sorted.length
+  const visible = sorted.slice(0, shownCount)
+  const hiddenItems = overflowing ? sorted.slice(shownCount) : []
   const hiddenTotal = hiddenItems.reduce((sum, i) => sum + (i.amount ?? 0), 0)
 
   return (
-    <div className="space-y-4 lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:space-y-3">
+    <div className={compact ? 'flex h-full min-h-0 flex-col gap-2 sm:gap-3' : 'space-y-4'}>
       {/* Barra parte-sobre-el-total */}
-      <div className="card p-4 lg:shrink-0 lg:px-4 lg:py-3">
+      <div className={`card ${compact ? 'shrink-0 px-3 py-2.5 sm:px-4 sm:py-3' : 'p-4'}`}>
         <div className="mb-2 flex items-baseline justify-between">
           <span className="section-title">Gasto del mes</span>
           <span className="text-sm font-semibold tabular-nums">{formatCurrency(total, currency)}</span>
@@ -71,12 +76,12 @@ export function CategoryBreakdownPanel({ items, currency, accentHex = '#8B5CF6' 
 
       {/* Filas ordenadas. En escritorio esta zona recibe el alto que sobra (se mide) y cada
           categoría es una sola línea; en móvil, dos líneas y scroll natural de la página. */}
-      <div ref={ref} className="lg:min-h-0 lg:flex-1 lg:overflow-hidden">
-        <ul className="space-y-2 lg:space-y-1.5">
+      <div ref={ref} className={compact ? 'min-h-0 flex-1 overflow-hidden' : undefined}>
+        <ul className={compact ? 'space-y-1.5' : 'space-y-2'}>
           {visible.map((item, i) => {
             const isHovered = hovered === item.categoryId
             const bar = (
-              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
+              <div className={`h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.06] ${compact ? 'hidden sm:block' : ''}`}>
                 <div
                   className="h-full rounded-full transition-[width]"
                   style={{
@@ -110,16 +115,16 @@ export function CategoryBreakdownPanel({ items, currency, accentHex = '#8B5CF6' 
                 key={item.categoryId}
                 onMouseEnter={() => setHovered(item.categoryId)}
                 onMouseLeave={() => setHovered(null)}
-                className={`card transition ${isDesktop ? 'flex h-11 items-center gap-3 px-3' : 'p-3.5'} ${
+                className={`card transition ${compact ? 'flex h-10 items-center gap-3 px-3' : 'p-3.5'} ${
                   isHovered ? 'border-white/15 bg-slate-800/70' : ''
                 }`}
               >
-                {isDesktop ? (
+                {compact ? (
                   <>
-                    <span className="flex w-2/5 min-w-0 shrink-0">{name}</span>
+                    <span className="flex min-w-0 flex-1 sm:w-2/5 sm:flex-none sm:shrink-0">{name}</span>
                     {bar}
                     {percentage}
-                    <span className="w-24 text-right">{amount}</span>
+                    <span className="w-24 shrink-0 text-right">{amount}</span>
                   </>
                 ) : (
                   <>
@@ -138,7 +143,7 @@ export function CategoryBreakdownPanel({ items, currency, accentHex = '#8B5CF6' 
           })}
 
           {hiddenItems.length > 0 && (
-            <li className="card flex h-11 items-center justify-between gap-3 px-3 text-sm text-off-white/55">
+            <li className="card flex h-10 items-center justify-between gap-3 px-3 text-sm text-off-white/55">
               <span>
                 {hiddenItems.length} categoría{hiddenItems.length > 1 ? 's' : ''} más
               </span>

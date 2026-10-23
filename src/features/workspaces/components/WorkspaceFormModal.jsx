@@ -11,6 +11,7 @@ import {
   resolveIcon,
 } from '../lib/workspaceTheme'
 import { workspaceErrorMessage } from '../lib/workspaceError'
+import { FieldLabel } from '../../../components/Field'
 
 /**
  * Alta y edición de un módulo (nombre + color + ícono). `workspace` presente => modo
@@ -48,9 +49,7 @@ export function WorkspaceFormModal({ open, onClose, workspace, onCreated }) {
     <Modal open={open} onClose={onClose} title={editing ? 'Editar módulo' : 'Crear módulo'} center>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="label" htmlFor="workspace-name">
-            Nombre
-          </label>
+          <FieldLabel id="workspace-name" label="Nombre" help="workspaces.name" />
           <input
             id="workspace-name"
             className="input"
@@ -64,7 +63,7 @@ export function WorkspaceFormModal({ open, onClose, workspace, onCreated }) {
         </div>
 
         <div>
-          <span className="label">Color</span>
+          <FieldLabel label="Color" help="workspaces.color" />
           <div className="flex flex-wrap gap-2">
             {WORKSPACE_COLOR_OPTIONS.map((hex) => (
               <button
@@ -85,7 +84,7 @@ export function WorkspaceFormModal({ open, onClose, workspace, onCreated }) {
         </div>
 
         <div>
-          <span className="label">Ícono</span>
+          <FieldLabel label="Ícono" help="workspaces.icon" />
           <div className="grid grid-cols-8 gap-1.5 sm:grid-cols-10">
             {WORKSPACE_ICON_OPTIONS.map((name_) => {
               const IconCmp = resolveIcon(name_)

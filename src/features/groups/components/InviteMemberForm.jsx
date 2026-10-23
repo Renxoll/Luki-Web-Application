@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { UserPlus } from 'lucide-react'
 import { useInviteMember } from '../api/useInviteMember'
 import { Button } from '../../../components/Button'
+import { FieldLabel } from '../../../components/Field'
 
 const ERROR_MESSAGES = {
   400: 'Ese email no tiene una cuenta en SmartCash todavía. Pídele que se registre primero.',
@@ -44,7 +45,10 @@ export function InviteMemberForm({ groupId }) {
       <p className="text-sm font-semibold">Invitar por email</p>
       <p className="text-xs text-off-white/45">Solo puedes invitar a alguien que ya tenga cuenta en SmartCash.</p>
 
+      <div>
+        <FieldLabel id="invite-email" label="Correo del invitado" help="groups.inviteEmail" />
       <input
+        id="invite-email"
         type="email"
         required
         autoFocus
@@ -53,6 +57,7 @@ export function InviteMemberForm({ groupId }) {
         placeholder="correo@ejemplo.com"
         className="input"
       />
+      </div>
 
       {isError && <p className="text-sm text-rose-300">{errorMessage}</p>}
 

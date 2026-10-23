@@ -5,6 +5,7 @@ import { Button } from '../../../components/Button'
 import { useCategories } from '../api/useCategories'
 import { useCorrectTransactionDetails } from '../api/useCorrectTransactionDetails'
 import { isUnknownMerchant } from '../lib/unknownMerchant'
+import { FieldLabel } from '../../../components/Field'
 
 /**
  * Pone a mano en qué se gastó: monto + comercio, y la categoría cuando Luki no pudo leer el
@@ -46,9 +47,7 @@ export function CompleteExpenseModal({ open, onClose, transaction }) {
         )}
 
         <div>
-          <label className="label" htmlFor="complete-amount">
-            Monto (S/)
-          </label>
+          <FieldLabel id="complete-amount" label="Monto (S/)" help="transactions.complete.amount" />
           <input
             id="complete-amount"
             className="input"
@@ -64,9 +63,7 @@ export function CompleteExpenseModal({ open, onClose, transaction }) {
         </div>
 
         <div>
-          <label className="label" htmlFor="complete-merchant">
-            ¿En qué o a quién?
-          </label>
+          <FieldLabel id="complete-merchant" label="¿En qué o a quién?" help="transactions.complete.merchant" />
           <input
             id="complete-merchant"
             className="input"
@@ -81,9 +78,7 @@ export function CompleteExpenseModal({ open, onClose, transaction }) {
 
         {needsCategory && (
           <div>
-            <label className="label" htmlFor="complete-category">
-              Categoría
-            </label>
+            <FieldLabel id="complete-category" label="Categoría" help="transactions.complete.category" />
             <select
               id="complete-category"
               className="input"

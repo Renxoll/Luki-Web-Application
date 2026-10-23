@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ArrowLeft, Sparkles, SendHorizonal } from 'lucide-react'
 import { useAskAdvisor } from '../api/useAskAdvisor'
 import { Markdown } from '../../../components/Markdown'
+import { FieldHelp } from '../../../components/FieldHelp'
 
 const WELCOME_MESSAGE = {
   role: 'luki',
@@ -144,7 +145,9 @@ export function AdvisorChat() {
         className="shrink-0 border-t border-white/[0.06] bg-midnight/80 px-4 py-4 backdrop-blur-xl sm:px-6"
       >
         <div className="mx-auto flex max-w-2xl items-center gap-2">
+          <FieldHelp helpKey="advisor.question" label="tu pregunta a Luki" />
           <input
+            aria-label="Tu pregunta a Luki"
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}

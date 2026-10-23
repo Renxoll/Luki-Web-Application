@@ -5,6 +5,7 @@ import { useLogin } from '../api/useLogin'
 import { AuthLayout } from '../components/AuthLayout'
 import { Button } from '../../../components/Button'
 import { PasswordInput } from '../../../components/PasswordInput'
+import { FieldLabel } from '../../../components/Field'
 
 export function Login() {
   const [email, setEmail] = useState('')
@@ -41,9 +42,7 @@ export function Login() {
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="email" className="label">
-            Email
-          </label>
+          <FieldLabel id="email" label="Email" help="auth.email" />
           <input
             id="email"
             type="email"
@@ -58,9 +57,7 @@ export function Login() {
 
         <div>
           <div className="flex items-baseline justify-between">
-            <label htmlFor="password" className="label">
-              Contraseña
-            </label>
+            <FieldLabel id="password" label="Contraseña" help="auth.password" />
             <Link
               to="/forgot-password"
               className="text-xs font-medium text-neon-purple hover:brightness-125"

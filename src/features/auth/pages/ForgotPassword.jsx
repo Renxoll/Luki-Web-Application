@@ -4,6 +4,7 @@ import { AlertCircle, MailCheck } from 'lucide-react'
 import { useRequestPasswordReset } from '../api/usePasswordReset'
 import { AuthLayout } from '../components/AuthLayout'
 import { Button } from '../../../components/Button'
+import { FieldLabel } from '../../../components/Field'
 
 export function ForgotPassword() {
   const [email, setEmail] = useState('')
@@ -39,9 +40,7 @@ export function ForgotPassword() {
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="label">
-              Email
-            </label>
+            <FieldLabel id="email" label="Email" help="auth.email" />
             <input
               id="email"
               type="email"

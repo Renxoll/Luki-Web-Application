@@ -4,6 +4,7 @@ import { useRecordManualExpense } from '../api/useRecordManualExpense'
 import { useCategories } from '../api/useCategories'
 import { Button } from '../../../components/Button'
 import { useActiveWorkspace } from '../../workspaces/api/useActiveWorkspace'
+import { FieldLabel } from '../../../components/Field'
 
 const CURRENCY = 'PEN'
 
@@ -70,29 +71,40 @@ export function RecordExpenseForm() {
       </p>
 
       <div className="flex flex-col gap-2 sm:flex-row">
-        <input
-          type="number"
-          inputMode="decimal"
-          step="0.01"
-          min="0.01"
-          required
-          autoFocus
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder="Monto (S/)"
-          className="input sm:w-36"
-        />
-        <input
-          type="text"
-          required
-          value={merchant}
-          onChange={(e) => setMerchant(e.target.value)}
-          placeholder="¿En qué o a quién? (ej. Almuerzo, Uber, Juan Pérez)"
-          className="input flex-1"
-        />
+        <div className="sm:w-36">
+          <FieldLabel id="expense-amount" label="Monto (S/)" help="transactions.expense.amount" />
+          <input
+            id="expense-amount"
+            type="number"
+            inputMode="decimal"
+            step="0.01"
+            min="0.01"
+            required
+            autoFocus
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="0.00"
+            className="input"
+          />
+        </div>
+        <div className="flex-1">
+          <FieldLabel id="expense-merchant" label="¿En qué o a quién?" help="transactions.expense.merchant" />
+          <input
+            id="expense-merchant"
+            type="text"
+            required
+            value={merchant}
+            onChange={(e) => setMerchant(e.target.value)}
+            placeholder="ej. Almuerzo, Uber, Juan Pérez"
+            className="input"
+          />
+        </div>
       </div>
 
+      <div>
+        <FieldLabel id="expense-category" label="Categoría" help="transactions.expense.category" />
       <select
+        id="expense-category"
         value={categoryCode}
         onChange={(e) => setPickedCategory(e.target.value)}
         required
@@ -105,6 +117,7 @@ export function RecordExpenseForm() {
           </option>
         ))}
       </select>
+      </div>
 
       {isError && (
         <p className="text-sm text-rose-300">No se pudo registrar el gasto. Intenta de nuevo.</p>

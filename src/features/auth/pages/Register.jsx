@@ -5,6 +5,7 @@ import { useRegister } from '../api/useRegister'
 import { AuthLayout } from '../components/AuthLayout'
 import { Button } from '../../../components/Button'
 import { PasswordInput } from '../../../components/PasswordInput'
+import { FieldLabel } from '../../../components/Field'
 
 export function Register() {
   const [displayName, setDisplayName] = useState('')
@@ -46,9 +47,7 @@ export function Register() {
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="displayName" className="label">
-            Nombre
-          </label>
+          <FieldLabel id="displayName" label="Nombre" help="auth.displayName" />
           <input
             id="displayName"
             type="text"
@@ -62,9 +61,7 @@ export function Register() {
         </div>
 
         <div>
-          <label htmlFor="email" className="label">
-            Email
-          </label>
+          <FieldLabel id="email" label="Email" help="auth.email" />
           <input
             id="email"
             type="email"
@@ -78,9 +75,7 @@ export function Register() {
         </div>
 
         <div>
-          <label htmlFor="password" className="label">
-            Contraseña
-          </label>
+          <FieldLabel id="password" label="Contraseña" help="auth.newPassword" />
           <PasswordInput
             id="password"
             autoComplete="new-password"
@@ -93,9 +88,7 @@ export function Register() {
         </div>
 
         <div>
-          <label htmlFor="confirmPassword" className="label">
-            Confirmar contraseña
-          </label>
+          <FieldLabel id="confirmPassword" label="Confirmar contraseña" help="auth.confirmPassword" />
           <PasswordInput
             id="confirmPassword"
             autoComplete="new-password"

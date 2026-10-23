@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react'
 import { useRecordManualIncome } from '../api/useRecordManualIncome'
 import { Button } from '../../../components/Button'
 import { useActiveWorkspace } from '../../workspaces/api/useActiveWorkspace'
+import { FieldLabel } from '../../../components/Field'
 
 const CURRENCY = 'PEN'
 
@@ -51,26 +52,34 @@ export function RecordIncomeForm() {
       </p>
 
       <div className="flex flex-col gap-2 sm:flex-row">
-        <input
-          type="number"
-          inputMode="decimal"
-          step="0.01"
-          min="0.01"
-          required
-          autoFocus
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder="Monto (S/)"
-          className="input sm:w-36"
-        />
-        <input
-          type="text"
-          required
-          value={source}
-          onChange={(e) => setSource(e.target.value)}
-          placeholder="¿De quién o de dónde? (ej. Sueldo, Juan Pérez)"
-          className="input flex-1"
-        />
+        <div className="sm:w-36">
+          <FieldLabel id="income-amount" label="Monto (S/)" help="transactions.income.amount" />
+          <input
+            id="income-amount"
+            type="number"
+            inputMode="decimal"
+            step="0.01"
+            min="0.01"
+            required
+            autoFocus
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="0.00"
+            className="input"
+          />
+        </div>
+        <div className="flex-1">
+          <FieldLabel id="income-source" label="¿De quién o de dónde?" help="transactions.income.source" />
+          <input
+            id="income-source"
+            type="text"
+            required
+            value={source}
+            onChange={(e) => setSource(e.target.value)}
+            placeholder="ej. Sueldo, Juan Pérez"
+            className="input"
+          />
+        </div>
       </div>
 
       {isError && (

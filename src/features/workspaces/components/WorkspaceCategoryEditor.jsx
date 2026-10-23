@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, Check, X } from 'lucide-react'
 import { useWorkspaceMutations } from '../api/useWorkspaceMutations'
 import { WorkspaceGlyph } from '../lib/WorkspaceGlyph'
 import { workspaceErrorMessage } from '../lib/workspaceError'
+import { FieldLabel } from '../../../components/Field'
 
 function CategoryRow({ workspaceId, category, colorHex, canDelete }) {
   const { updateCategory, archiveCategory } = useWorkspaceMutations()
@@ -128,13 +129,15 @@ export function WorkspaceCategoryEditor({ workspace }) {
     <div className="space-y-2">
       {/* El campo para crear va arriba y siempre visible -- antes quedaba al pie de la lista
           y con varias categorías había que scrollear el modal para llegar. */}
+      <FieldLabel id="new-category" label="Nueva categoría" help="workspaces.category.new" />
       <form onSubmit={add} className="flex gap-2">
         <input
+          id="new-category"
           className="input h-9 flex-1 py-1 text-sm"
           value={newName}
           maxLength={60}
           onChange={(e) => setNewName(e.target.value)}
-          placeholder="Nueva categoría"
+          placeholder="ej. Marketing"
         />
         <button
           type="submit"

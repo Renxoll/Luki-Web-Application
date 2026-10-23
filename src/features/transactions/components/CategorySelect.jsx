@@ -10,6 +10,8 @@ export function CategorySelect({ value, onChange, disabled, options }) {
 
   return (
     <select
+      aria-label="Categoría del movimiento"
+      title="Categoría del movimiento"
       value={value ?? ''}
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled || (!options && isLoading)}

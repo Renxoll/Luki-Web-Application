@@ -68,7 +68,7 @@ describe('Módulos: alta y errores 409', () => {
     addWorkspaceCategory.mockRejectedValue(conflict('Ya existe una categoría "Comida" en este módulo'))
     renderWithProviders(<WorkspaceCategoryEditor workspace={CUSTOM} />)
 
-    await userEvent.type(screen.getByPlaceholderText('Nueva categoría'), 'Comida')
+    await userEvent.type(screen.getByLabelText('Nueva categoría'), 'Comida')
     await userEvent.click(screen.getByRole('button', { name: 'Agregar categoría' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Ya existe una categoría "Comida" en este módulo')

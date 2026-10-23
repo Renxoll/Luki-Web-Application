@@ -79,4 +79,19 @@ describe('useFitCount', () => {
 
     expect(screen.getByTestId('box')).toHaveTextContent('10')
   })
+
+  it('con `always` mide también fuera de escritorio (celular y tablet)', () => {
+    mockDesktop(false)
+    render(<Probe itemHeight={46} fallback={null} always />)
+
+    expect(screen.getByTestId('box')).toHaveTextContent('11') // floor(520 / 46)
+  })
+
+  it('permite que no entre ni un elemento cuando el mínimo es 0', () => {
+    mockDesktop(false)
+    containerHeight = 20
+    render(<Probe itemHeight={46} fallback={null} min={0} always />)
+
+    expect(screen.getByTestId('box')).toHaveTextContent('0')
+  })
 })

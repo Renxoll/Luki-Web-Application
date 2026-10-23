@@ -10,6 +10,14 @@ import { LogoutOverlay } from './LogoutOverlay'
 // un pequeño margen para que el usuario alcance a leer "Cerrando sesión…" antes del salto.
 const LOGOUT_TRANSITION_MS = 550
 
+// 4rem + 1px es la barra superior (con su borde); 5rem, la navegación inferior de móvil (pb-20).
+// Las clases van completas (no armadas por pedazos) para que Tailwind las detecte.
+const MAIN_FIT_CLASS = {
+  false: 'py-8',
+  true: 'py-8 lg:flex lg:h-[calc(100dvh-4rem-1px)] lg:flex-col lg:overflow-hidden lg:py-4',
+  all: 'flex h-[calc(100dvh-4rem-1px-5rem)] flex-col overflow-hidden py-3 sm:h-[calc(100dvh-4rem-1px)] sm:py-4',
+}
+
 const NAV = [
   { to: '/dashboard', label: 'Resumen', icon: LayoutDashboard },
   { to: '/transactions', label: 'Movimientos', icon: ArrowLeftRight },
@@ -33,9 +41,10 @@ function mobileNavClass({ isActive }) {
  * Layout de las pantallas autenticadas: barra superior con marca + navegación + logout,
  * contenedor central con ancho máximo, y navegación inferior en móvil.
  *
- * Con `fit`, en escritorio el contenido ocupa exactamente el alto que deja la barra superior
- * (sin scroll de página): la pantalla reparte ese alto y mide cuántas filas le caben, en vez
- * de crecer hacia abajo. En móvil y tablet sigue el scroll natural.
+ * Con `fit`, el contenido ocupa exactamente el alto que dejan la barra superior (y, en móvil,
+ * la navegación inferior): sin scroll de página, la pantalla reparte ese alto y mide cuántas
+ * filas le caben en vez de crecer hacia abajo. `fit` solo aplica en escritorio; `fit="all"`
+ * también en tablet y celular.
  */
 export function AppShell({ children, maxWidth = 'max-w-3xl', fit = false }) {
   const navigate = useNavigate()
@@ -106,13 +115,7 @@ export function AppShell({ children, maxWidth = 'max-w-3xl', fit = false }) {
         </div>
       </header>
 
-      <main
-        className={`mx-auto px-4 py-8 sm:px-6 ${maxWidth} ${
-          fit ? 'lg:flex lg:h-[calc(100dvh-4rem-1px)] lg:flex-col lg:overflow-hidden lg:py-4' : ''
-        }`}
-      >
-        {children}
-      </main>
+      <main className={`mx-auto px-4 sm:px-6 ${maxWidth} ${MAIN_FIT_CLASS[String(fit)]}`}>{children}</main>
 
       <nav className="fixed inset-x-0 bottom-0 z-30 flex border-t border-white/10 bg-midnight/95 backdrop-blur-xl sm:hidden">
         {NAV.map(({ to, label, icon: Icon }) => (
